@@ -77,3 +77,10 @@ export const loginUser = async (req, res) => {
 export const logoutUser = async (req, res) => {
   res.status(200).json({ message: "User logged out" });
 };
+
+export const getUserProfile = async (req, res) => {
+  res.status(200).json({
+    message: "Protected profile data",
+    user: req.user,
+  });
+};
