@@ -1,3 +1,73 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --sidebar-width: 280px;
+    --header-height: 64px;
+  }
+
+  * {
+    @apply border-slate-200;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+}
+
+@layer components {
+  /* Button components */
+  .btn-primary {
+    @apply bg-gradient-to-r from-taskflow-600 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:brightness-110 hover:shadow-lg transition-all duration-200 hover:scale-[1.02];
+  }
+
+  .btn-secondary {
+    @apply bg-white text-slate-700 px-6 py-3 rounded-xl font-medium hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-all duration-200 border border-slate-200 shadow-sm hover:shadow-md;
+  }
+
+  /* Card components */
+  .card {
+    @apply bg-white rounded-xl border border-slate-200 shadow-lg;
+  }
+
+  .auth-card {
+    @apply bg-white rounded-xl border border-slate-200 shadow-xl p-8;
+  }
+
+  /* Input components */
+  .input-field {
+    @apply w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm placeholder-slate-400 transition-all duration-200 bg-white;
+  }
+
+  /* Status badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-success-100 text-success-800;
+  }
+
+  .badge-error {
+    @apply bg-red-100 text-red-800 border border-red-200;
+  }
+}

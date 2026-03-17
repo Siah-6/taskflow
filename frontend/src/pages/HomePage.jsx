@@ -19,29 +19,32 @@ function HomePage() {
 
   if (isChecking)
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-taskflow-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-slate-50 p-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-          >
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
+            <p className="text-slate-600">Welcome to your productivity hub</p>
+          </div>
+          <button onClick={handleLogout} className="btn-secondary">
             Logout
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        <div className="card p-6">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">
             Welcome to your Dashboard!
           </h2>
-          <p className="text-gray-600">
+          <p className="text-slate-600">
             This is a protected page. Only authenticated users can see this
             content.
           </p>
