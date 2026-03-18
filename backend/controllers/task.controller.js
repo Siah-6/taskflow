@@ -22,3 +22,16 @@ export const createTask = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// GET all tasks for logged-in user
+export const getTasks = async (req, res) => {
+  try {
+    const tasks = await Task.find({ user: req.user.userId }).sort({
+      createdAt: -1,
+    });
+    res.status(200).json(tasks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error while fetching tasks" });
+  }
+};
