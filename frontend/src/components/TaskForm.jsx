@@ -5,11 +5,13 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
     title: initialData.title || "",
     description: initialData.description || "",
     status: initialData.status || "To Do",
+    priority: initialData.priority || "Medium",
   });
 
   const [errors, setErrors] = useState({});
 
   const statusOptions = ["To Do", "In Progress", "Completed"];
+  const priorityOptions = ["Low", "Medium", "High"];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,7 +42,7 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = validateForm();
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -62,7 +64,10 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
       </div>
 
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-slate-700 mb-1">
+        <label
+          htmlFor="title"
+          className="block text-sm font-medium text-slate-700 mb-1"
+        >
           Title *
         </label>
         <input
@@ -80,7 +85,10 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">
+        <label
+          htmlFor="description"
+          className="block text-sm font-medium text-slate-700 mb-1"
+        >
           Description
         </label>
         <textarea
@@ -101,7 +109,10 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
       </div>
 
       <div>
-        <label htmlFor="status" className="block text-sm font-medium text-slate-700 mb-1">
+        <label
+          htmlFor="status"
+          className="block text-sm font-medium text-slate-700 mb-1"
+        >
           Status
         </label>
         <select
@@ -119,18 +130,33 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
         </select>
       </div>
 
-      <div className="flex gap-3 pt-4">
-        <button
-          type="submit"
-          className="btn-primary"
+      <div>
+        <label
+          htmlFor="priority"
+          className="block text-sm font-medium text-slate-700 mb-1"
         >
+          Priority
+        </label>
+        <select
+          id="priority"
+          name="priority"
+          value={formData.priority}
+          onChange={handleChange}
+          className="input-field"
+        >
+          {priorityOptions.map((priority) => (
+            <option key={priority} value={priority}>
+              {priority}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex gap-3 pt-4">
+        <button type="submit" className="btn-primary">
           {initialData._id ? "Update Task" : "Create Task"}
         </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="btn-secondary"
-        >
+        <button type="button" onClick={onCancel} className="btn-secondary">
           Cancel
         </button>
       </div>

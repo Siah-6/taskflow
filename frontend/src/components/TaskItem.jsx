@@ -6,9 +6,11 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
     title: task.title,
     description: task.description,
     status: task.status,
+    priority: task.priority || "Medium",
   });
 
   const statusOptions = ["To Do", "In Progress", "Completed"];
+  const priorityOptions = ["Low", "Medium", "High"];
 
   const handleStatusChange = (newStatus) => {
     onUpdateTask(task._id, { status: newStatus });
@@ -20,6 +22,7 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
       title: task.title,
       description: task.description,
       status: task.status,
+      priority: task.priority || "Medium",
     });
   };
 
@@ -34,6 +37,7 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
       title: task.title,
       description: task.description,
       status: task.status,
+      priority: task.priority || "Medium",
     });
   };
 
@@ -54,6 +58,17 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
     }
   };
 
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case "High":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "Medium":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
   return (
     <div className="card p-4 hover:shadow-md transition-shadow">
       {isEditing ? (
@@ -65,7 +80,9 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
             <input
               type="text"
               value={editData.title}
-              onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+              onChange={(e) =>
+                setEditData({ ...editData, title: e.target.value })
+              }
               className="input-field"
             />
           </div>
@@ -75,7 +92,9 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
             </label>
             <textarea
               value={editData.description}
-              onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+              onChange={(e) =>
+                setEditData({ ...editData, description: e.target.value })
+              }
               className="input-field"
               rows={3}
             />
@@ -86,12 +105,32 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
             </label>
             <select
               value={editData.status}
-              onChange={(e) => setEditData({ ...editData, status: e.target.value })}
+              onChange={(e) =>
+                setEditData({ ...editData, status: e.target.value })
+              }
               className="input-field"
             >
               {statusOptions.map((status) => (
                 <option key={status} value={status}>
                   {status}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Priority
+            </label>
+            <select
+              value={editData.priority}
+              onChange={(e) =>
+                setEditData({ ...editData, priority: e.target.value })
+              }
+              className="input-field"
+            >
+              {priorityOptions.map((priority) => (
+                <option key={priority} value={priority}>
+                  {priority}
                 </option>
               ))}
             </select>
@@ -117,8 +156,15 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
               )}
             </div>
             <div className="flex items-center gap-2 ml-4">
-              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status)}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status)}`}
+              >
                 {task.status}
+              </span>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority || "Medium")}`}
+              >
+                {task.priority || "Medium"}
               </span>
             </div>
           </div>
