@@ -11,6 +11,8 @@ function TaskPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [priorityFilter, setPriorityFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("newest"); // newest, oldest, priority
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -35,6 +37,26 @@ function TaskPage() {
     }
     fetchTasks();
   }, [token, navigate, fetchTasks]);
+
+  // Filter and sort tasks
+  const filteredTasks = tasks
+    .filter((task) => {
+      if (priorityFilter === "All") return true;
+      return (task.priority || "Medium") === priorityFilter;
+    })
+    .sort((a, b) => {
+      if (sortBy === "newest") {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      } else if (sortBy === "oldest") {
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      } else if (sortBy === "priority") {
+        const priorityOrder = { High: 0, Medium: 1, Low: 2 };
+        const aPriority = priorityOrder[a.priority || "Medium"];
+        const bPriority = priorityOrder[b.priority || "Medium"];
+        return aPriority - bPriority;
+      }
+      return 0;
+    });
 
   const handleCreateTask = async (taskData) => {
     try {
@@ -132,8 +154,33 @@ function TaskPage() {
         )}
 
         <div className="card p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold text-slate-900">Tasks</h2>
+            <div className="flex items-center gap-4">
+              <select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-taskflow-500"
+              >
+                <option value="All">All Priorities</option>
+                <option value="High">High Priority</option>
+                <option value="Medium">Medium Priority</option>
+                <option value="Low">Low Priority</option>
+              </select>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-taskflow-500"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="priority">Priority Order</option>
+              </select>
+            </div>
+          </div>
+
           <TaskList
-            tasks={tasks}
+            tasks={filteredTasks}
             loading={loading}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}

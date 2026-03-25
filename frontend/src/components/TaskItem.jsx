@@ -145,62 +145,84 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
           </div>
         </div>
       ) : (
-        <div className="space-y-3">
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <h3 className="text-lg font-medium text-slate-900 mb-2">
+        <div className="bg-white border border-gray-200 rounded-md p-3 hover:shadow-sm transition-shadow cursor-pointer">
+          <div className="space-y-2">
+            {/* Task Header */}
+            <div className="flex items-start justify-between gap-2">
+              <h4 className="text-sm font-medium text-gray-900 leading-tight flex-1">
                 {task.title}
-              </h3>
-              {task.description && (
-                <p className="text-slate-600 mb-3">{task.description}</p>
-              )}
-            </div>
-            <div className="flex items-center gap-2 ml-4">
+              </h4>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status)}`}
-              >
-                {task.status}
-              </span>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority || "Medium")}`}
+                className={`px-2 py-0.5 rounded text-xs font-medium border flex-shrink-0 ${getPriorityColor(
+                  task.priority || "Medium",
+                )}`}
               >
                 {task.priority || "Medium"}
               </span>
             </div>
-          </div>
 
-          <div className="flex justify-between items-center">
-            <div className="flex gap-2">
-              <select
-                value={task.status}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                className="text-sm border border-slate-200 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-taskflow-500"
-              >
-                {statusOptions.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={handleEdit}
-                className="text-sm text-slate-600 hover:text-slate-900 font-medium"
-              >
-                Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                className="text-sm text-red-600 hover:text-red-700 font-medium"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
+            {/* Task Description */}
+            {task.description && (
+              <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
+                {task.description}
+              </p>
+            )}
 
-          <div className="text-xs text-slate-500">
-            Created: {new Date(task.createdAt).toLocaleDateString()}
+            {/* Task Footer */}
+            <div className="flex items-center justify-between pt-1">
+              <span
+                className={`px-2 py-0.5 rounded text-xs font-medium border ${getStatusColor(
+                  task.status,
+                )}`}
+              >
+                {task.status}
+              </span>
+
+              <div className="flex items-center gap-1 opacity-0 hover:opacity-100 transition-opacity">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEdit();
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                >
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete();
+                  }}
+                  className="text-gray-400 hover:text-red-600 transition-colors p-1"
+                >
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
