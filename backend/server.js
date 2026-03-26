@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import authRoutes from "./routes/auth.route.js";
 import taskRoutes from "./routes/task.route.js";
+import projectRoutes from "./routes/project.route.js";
 import { connectDB } from "./config/db.js";
 import { fileURLToPath } from "url";
 import path from "path";
@@ -21,6 +22,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/projects", projectRoutes);
 
 app.get("/", (req, res) => {
   res.send("TaskFlow API running");

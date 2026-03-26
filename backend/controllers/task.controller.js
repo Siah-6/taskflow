@@ -3,16 +3,27 @@ import mongoose from "mongoose";
 
 export const createTask = async (req, res) => {
   try {
-    const { title, description, priority } = req.body;
+    const { title, description, priority, project, board } = req.body;
 
     if (!title) {
       return res.status(400).json({ message: "Title is required" });
+    }
+
+    // Validate project ID if provided
+    let projectId = null;
+    if (project && project !== "" && project !== "null") {
+      if (!mongoose.Types.ObjectId.isValid(project)) {
+        return res.status(400).json({ message: "Invalid project ID format" });
+      }
+      projectId = project;
     }
 
     const task = await Task.create({
       title,
       description,
       priority: priority || "Medium",
+      project: projectId,
+      board: board || "To Do",
       user: req.user.userId, // from JWT
     });
 
@@ -21,7 +32,8 @@ export const createTask = async (req, res) => {
       task,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error creating task:", error);
+    res.status(500).json({ message: "Failed to create task" });
   }
 };
 
