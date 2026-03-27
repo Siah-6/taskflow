@@ -133,6 +133,12 @@ function TaskPage() {
             <p className="text-slate-600">Manage your tasks efficiently</p>
           </div>
           <div className="flex gap-4">
+            <button
+              onClick={() => navigate("/projects")}
+              className="btn-secondary"
+            >
+              Projects
+            </button>
             <button onClick={() => setShowForm(true)} className="btn-primary">
               Create Task
             </button>
