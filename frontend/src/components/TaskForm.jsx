@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 function TaskForm({ onSubmit, onCancel, initialData = {} }) {
   const [formData, setFormData] = useState({
@@ -6,12 +7,34 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
     description: initialData.description || "",
     status: initialData.status || "To Do",
     priority: initialData.priority || "Medium",
+    project: initialData.project || "",
   });
 
   const [errors, setErrors] = useState({});
+  const [projects, setProjects] = useState([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
 
   const statusOptions = ["To Do", "In Progress", "Completed"];
   const priorityOptions = ["Low", "Medium", "High"];
+
+  // Fetch projects for dropdown
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get("http://localhost:5000/api/projects", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setProjects(response.data);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      } finally {
+        setLoadingProjects(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,6 +75,8 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
       title: formData.title.trim(),
       description: formData.description.trim(),
       status: formData.status,
+      priority: formData.priority,
+      project: formData.project || null,
     });
   };
 
@@ -150,6 +175,33 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
             </option>
           ))}
         </select>
+      </div>
+
+      <div>
+        <label
+          htmlFor="project"
+          className="block text-sm font-medium text-slate-700 mb-1"
+        >
+          Project
+        </label>
+        <select
+          id="project"
+          name="project"
+          value={formData.project}
+          onChange={handleChange}
+          className="input-field"
+          disabled={loadingProjects}
+        >
+          <option value="">No Project</option>
+          {projects.map((project) => (
+            <option key={project._id} value={project._id}>
+              {project.name}
+            </option>
+          ))}
+        </select>
+        {loadingProjects && (
+          <p className="text-xs text-slate-500 mt-1">Loading projects...</p>
+        )}
       </div>
 
       <div className="flex gap-3 pt-4">

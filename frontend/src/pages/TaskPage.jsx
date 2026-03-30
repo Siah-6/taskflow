@@ -8,10 +8,12 @@ function TaskPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [priorityFilter, setPriorityFilter] = useState("All");
+  const [projectFilter, setProjectFilter] = useState("All");
   const [sortBy, setSortBy] = useState("newest"); // newest, oldest, priority
 
   const fetchTasks = useCallback(async () => {
@@ -30,6 +32,25 @@ function TaskPage() {
     }
   }, [token]);
 
+  // Fetch projects for filter dropdown
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get("http://localhost:5000/api/projects", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setProjects(response.data);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
+    };
+
+    if (token) {
+      fetchProjects();
+    }
+  }, [token]);
+
   useEffect(() => {
     if (!token) {
       navigate("/login");
@@ -41,8 +62,22 @@ function TaskPage() {
   // Filter and sort tasks
   const filteredTasks = tasks
     .filter((task) => {
-      if (priorityFilter === "All") return true;
-      return (task.priority || "Medium") === priorityFilter;
+      // Priority filter
+      if (
+        priorityFilter !== "All" &&
+        (task.priority || "Medium") !== priorityFilter
+      ) {
+        return false;
+      }
+
+      // Project filter
+      if (projectFilter !== "All") {
+        if (!task.project || task.project._id !== projectFilter) {
+          return false;
+        }
+      }
+
+      return true;
     })
     .sort((a, b) => {
       if (sortBy === "newest") {
@@ -163,6 +198,18 @@ function TaskPage() {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold text-slate-900">Tasks</h2>
             <div className="flex items-center gap-4">
+              <select
+                value={projectFilter}
+                onChange={(e) => setProjectFilter(e.target.value)}
+                className="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-taskflow-500"
+              >
+                <option value="All">All Projects</option>
+                {projects.map((project) => (
+                  <option key={project._id} value={project._id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
