@@ -1,6 +1,17 @@
 import TaskItem from "./TaskItem";
 
-function TaskList({ tasks, loading, onUpdateTask, onDeleteTask, onRefresh }) {
+function TaskList({
+  tasks,
+  loading,
+  onUpdateTask,
+  onDeleteTask,
+  onRefresh,
+  boards = [
+    { name: "To Do", color: "#6B7280" },
+    { name: "In Progress", color: "#3B82F6" },
+    { name: "Done", color: "#10B981" },
+  ],
+}) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -36,95 +47,60 @@ function TaskList({ tasks, loading, onUpdateTask, onDeleteTask, onRefresh }) {
     );
   }
 
-  // Group tasks by status
-  const todoTasks = tasks.filter((task) => task.status === "To Do");
-  const inProgressTasks = tasks.filter((task) => task.status === "In Progress");
-  const doneTasks = tasks.filter(
-    (task) => task.status === "Completed" || task.status === "Done",
-  );
+  // Group tasks by board
+  const getTasksForBoard = (boardName) => {
+    return tasks.filter(
+      (task) => task.board === boardName || task.status === boardName,
+    );
+  };
 
   return (
     <div className="grid grid-cols-3 gap-4">
-      {/* To Do Column */}
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-900">To Do</h3>
-            <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
-              {todoTasks.length}
-            </span>
-          </div>
-        </div>
-        <div className="p-3 space-y-2 min-h-[500px] bg-gray-50/50">
-          {todoTasks.map((task) => (
-            <TaskItem
-              key={task._id}
-              task={task}
-              onUpdateTask={onUpdateTask}
-              onDeleteTask={onDeleteTask}
-            />
-          ))}
-          {todoTasks.length === 0 && (
-            <div className="text-center py-12 text-gray-400 text-xs">
-              No tasks
-            </div>
-          )}
-        </div>
-      </div>
+      {boards.map((board) => {
+        const boardTasks = getTasksForBoard(board.name);
 
-      {/* In Progress Column */}
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-900">In Progress</h3>
-            <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs font-medium rounded-full">
-              {inProgressTasks.length}
-            </span>
-          </div>
-        </div>
-        <div className="p-3 space-y-2 min-h-[500px] bg-gray-50/50">
-          {inProgressTasks.map((task) => (
-            <TaskItem
-              key={task._id}
-              task={task}
-              onUpdateTask={onUpdateTask}
-              onDeleteTask={onDeleteTask}
-            />
-          ))}
-          {inProgressTasks.length === 0 && (
-            <div className="text-center py-12 text-gray-400 text-xs">
-              No tasks
+        return (
+          <div
+            key={board.name}
+            className="bg-white rounded-lg border border-gray-200"
+          >
+            <div className="px-4 py-3 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900">
+                  {board.name}
+                </h3>
+                <span
+                  className="px-2 py-0.5 text-xs font-medium rounded-full"
+                  style={{
+                    backgroundColor: board.color + "20",
+                    color: board.color,
+                  }}
+                >
+                  {boardTasks.length}
+                </span>
+              </div>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Done Column */}
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-900">Done</h3>
-            <span className="px-2 py-0.5 bg-green-50 text-green-600 text-xs font-medium rounded-full">
-              {doneTasks.length}
-            </span>
-          </div>
-        </div>
-        <div className="p-3 space-y-2 min-h-[500px] bg-gray-50/50">
-          {doneTasks.map((task) => (
-            <TaskItem
-              key={task._id}
-              task={task}
-              onUpdateTask={onUpdateTask}
-              onDeleteTask={onDeleteTask}
-            />
-          ))}
-          {doneTasks.length === 0 && (
-            <div className="text-center py-12 text-gray-400 text-xs">
-              No tasks
+            <div className="p-3 space-y-2 min-h-[500px] bg-gray-50/50">
+              {boardTasks.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-xs text-gray-500">
+                    No tasks in {board.name}
+                  </p>
+                </div>
+              ) : (
+                boardTasks.map((task) => (
+                  <TaskItem
+                    key={task._id}
+                    task={task}
+                    onUpdateTask={onUpdateTask}
+                    onDeleteTask={onDeleteTask}
+                  />
+                ))
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
