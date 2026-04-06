@@ -37,12 +37,77 @@ export const createTask = async (req, res) => {
   }
 };
 
-// GET all tasks for logged-in user
+// GET all tasks for logged-in user with filtering
 export const getTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({ user: req.user.userId }).sort({
-      createdAt: -1,
-    });
+    const {
+      status,
+      priority,
+      project,
+      board,
+      search,
+      dateFrom,
+      dateTo,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = req.query;
+
+    // Build filter object
+    const filter = { user: req.user.userId };
+
+    // Add filters
+    if (status && status !== "all") {
+      filter.status = status;
+    }
+
+    if (priority && priority !== "all") {
+      filter.priority = priority;
+    }
+
+    if (project && project !== "all") {
+      filter.project = project;
+    }
+
+    if (board && board !== "all") {
+      filter.board = board;
+    }
+
+    // Search functionality
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Date range filtering
+    if (dateFrom || dateTo) {
+      filter.createdAt = {};
+      if (dateFrom) {
+        filter.createdAt.$gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        filter.createdAt.$lte = new Date(dateTo);
+      }
+    }
+
+    // Sort options
+    const sortOptions = {};
+    const validSortFields = [
+      "createdAt",
+      "updatedAt",
+      "priority",
+      "status",
+      "title",
+    ];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+    sortOptions[sortField] = sortDirection;
+
+    const tasks = await Task.find(filter)
+      .sort(sortOptions)
+      .populate("project", "name");
+
     res.status(200).json(tasks);
   } catch (error) {
     console.error(error);
