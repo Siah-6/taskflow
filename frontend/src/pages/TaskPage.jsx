@@ -206,6 +206,11 @@ function TaskPage() {
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
             onRefresh={fetchTasks}
+            boards={[
+              { name: "To Do", color: "#6B7280" },
+              { name: "In Progress", color: "#3B82F6" },
+              { name: "Completed", color: "#10B981" },
+            ]}
           />
         </div>
       </div>

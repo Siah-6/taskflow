@@ -29,7 +29,12 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
   };
 
   const handleSave = () => {
-    onUpdateTask(task._id, editData);
+    // Sync board with status to ensure task appears in correct column
+    const updatedData = {
+      ...editData,
+      board: editData.status, // Update board to match status
+    };
+    onUpdateTask(task._id, updatedData);
     setIsEditing(false);
   };
 

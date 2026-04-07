@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import MultiSelect from "./MultiSelect";
+import FilterPresets from "./FilterPresets";
 
 function TaskFilters({ filters, onFiltersChange, projects }) {
   const [dateFrom, setDateFrom] = useState(filters.dateFrom || "");
@@ -7,14 +8,25 @@ function TaskFilters({ filters, onFiltersChange, projects }) {
   const [searchTerm, setSearchTerm] = useState(filters.search || "");
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const statusOptions = ["all", "To Do", "In Progress", "Completed", "Done"];
-  const priorityOptions = ["all", "Low", "Medium", "High"];
+  const statusOptions = [
+    { value: "To Do", label: "To Do" },
+    { value: "In Progress", label: "In Progress" },
+    { value: "Completed", label: "Completed" },
+    { value: "Done", label: "Done" },
+  ];
+
+  const priorityOptions = [
+    { value: "Low", label: "Low Priority" },
+    { value: "Medium", label: "Medium Priority" },
+    { value: "High", label: "High Priority" },
+  ];
+
   const sortOptions = [
     { value: "createdAt", label: "Created Date" },
     { value: "updatedAt", label: "Updated Date" },
     { value: "priority", label: "Priority" },
     { value: "status", label: "Status" },
-    { value: "title", label: "Title" }
+    { value: "title", label: "Title" },
   ];
 
   const handleFilterChange = (field, value) => {
@@ -52,9 +64,9 @@ function TaskFilters({ filters, onFiltersChange, projects }) {
       dateFrom: "",
       dateTo: "",
       sortBy: "createdAt",
-      sortOrder: "desc"
+      sortOrder: "desc",
     };
-    
+
     setDateFrom("");
     setDateTo("");
     setSearchTerm("");
@@ -63,8 +75,14 @@ function TaskFilters({ filters, onFiltersChange, projects }) {
 
   const getActiveFilterCount = () => {
     let count = 0;
-    if (filters.status && filters.status !== "all") count++;
-    if (filters.priority && filters.priority !== "all") count++;
+    if (filters.status && filters.status !== "all" && filters.status.length > 0)
+      count++;
+    if (
+      filters.priority &&
+      filters.priority !== "all" &&
+      filters.priority.length > 0
+    )
+      count++;
     if (filters.project && filters.project !== "all") count++;
     if (filters.board && filters.board !== "all") count++;
     if (filters.search) count++;
@@ -77,9 +95,9 @@ function TaskFilters({ filters, onFiltersChange, projects }) {
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-      {/* Search Bar */}
-      <div className="mb-4">
-        <div className="relative">
+      {/* Search Bar and Presets */}
+      <div className="flex gap-4 mb-4">
+        <div className="flex-1 relative">
           <input
             type="text"
             placeholder="Search tasks..."
@@ -104,45 +122,29 @@ function TaskFilters({ filters, onFiltersChange, projects }) {
             />
           </svg>
         </div>
+
+        <FilterPresets filters={filters} onFiltersChange={onFiltersChange} />
       </div>
 
       {/* Basic Filters */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
         {/* Status Filter */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Status
-          </label>
-          <select
-            value={filters.status || "all"}
-            onChange={(e) => handleFilterChange("status", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {statusOptions.map((status) => (
-              <option key={status} value={status}>
-                {status === "all" ? "All Statuses" : status}
-              </option>
-            ))}
-          </select>
-        </div>
+        <MultiSelect
+          options={statusOptions}
+          selectedValues={filters.status || []}
+          onChange={(values) => handleFilterChange("status", values)}
+          placeholder="All Statuses"
+          label="Status"
+        />
 
         {/* Priority Filter */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Priority
-          </label>
-          <select
-            value={filters.priority || "all"}
-            onChange={(e) => handleFilterChange("priority", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {priorityOptions.map((priority) => (
-              <option key={priority} value={priority}>
-                {priority === "all" ? "All Priorities" : priority}
-              </option>
-            ))}
-          </select>
-        </div>
+        <MultiSelect
+          options={priorityOptions}
+          selectedValues={filters.priority || []}
+          onChange={(values) => handleFilterChange("priority", values)}
+          placeholder="All Priorities"
+          label="Priority"
+        />
 
         {/* Project Filter */}
         <div>

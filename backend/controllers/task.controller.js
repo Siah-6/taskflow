@@ -55,13 +55,21 @@ export const getTasks = async (req, res) => {
     // Build filter object
     const filter = { user: req.user.userId };
 
-    // Add filters
+    // Add filters - handle arrays for multi-select
     if (status && status !== "all") {
-      filter.status = status;
+      if (Array.isArray(status)) {
+        filter.status = { $in: status };
+      } else {
+        filter.status = status;
+      }
     }
 
     if (priority && priority !== "all") {
-      filter.priority = priority;
+      if (Array.isArray(priority)) {
+        filter.priority = { $in: priority };
+      } else {
+        filter.priority = priority;
+      }
     }
 
     if (project && project !== "all") {
@@ -119,7 +127,7 @@ export const getTasks = async (req, res) => {
 export const updateTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, status, priority } = req.body;
+    const { title, description, status, priority, board } = req.body;
 
     // Validate ObjectId format
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -136,8 +144,13 @@ export const updateTask = async (req, res) => {
     // Update fields if provided
     if (title !== undefined) task.title = title;
     if (description !== undefined) task.description = description;
-    if (status !== undefined) task.status = status;
+    if (status !== undefined) {
+      task.status = status;
+      // Auto-sync board with status to ensure proper column placement
+      task.board = status;
+    }
     if (priority !== undefined) task.priority = priority;
+    if (board !== undefined) task.board = board;
 
     await task.save();
     res.status(200).json(task);

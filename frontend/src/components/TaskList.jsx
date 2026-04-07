@@ -49,9 +49,14 @@ function TaskList({
 
   // Group tasks by board
   const getTasksForBoard = (boardName) => {
-    return tasks.filter(
-      (task) => task.board === boardName || task.status === boardName,
-    );
+    return tasks.filter((task) => {
+      // First check if task has a board assigned
+      if (task.board) {
+        return task.board === boardName;
+      }
+      // Fall back to status if no board is assigned
+      return task.status === boardName;
+    });
   };
 
   return (
