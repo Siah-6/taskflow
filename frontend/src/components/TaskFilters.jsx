@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import MultiSelect from "./MultiSelect";
 import FilterPresets from "./FilterPresets";
+import RealTimeSearch from "./RealTimeSearch";
+import SearchAnalytics from "./SearchAnalytics";
 
-function TaskFilters({ filters, onFiltersChange, projects }) {
+function TaskFilters({ filters, onFiltersChange, projects, tasks = [] }) {
   const [dateFrom, setDateFrom] = useState(filters.dateFrom || "");
   const [dateTo, setDateTo] = useState(filters.dateTo || "");
-  const [searchTerm, setSearchTerm] = useState(filters.search || "");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   const statusOptions = [
     { value: "To Do", label: "To Do" },
@@ -34,21 +36,19 @@ function TaskFilters({ filters, onFiltersChange, projects }) {
     onFiltersChange(newFilters);
   };
 
-  const handleSearchChange = (value) => {
-    setSearchTerm(value);
-    // Debounce search
-    const timeoutId = setTimeout(() => {
+  const handleSearchChange = (field, value) => {
+    if (field === "search") {
       handleFilterChange("search", value);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
+    } else {
+      handleFilterChange(field, value);
+    }
   };
 
-  const handleDateChange = (type, value) => {
-    if (type === "from") {
+  const handleDateChange = (field, value) => {
+    if (field === "dateFrom") {
       setDateFrom(value);
       handleFilterChange("dateFrom", value);
-    } else {
+    } else if (field === "dateTo") {
       setDateTo(value);
       handleFilterChange("dateTo", value);
     }
@@ -56,11 +56,11 @@ function TaskFilters({ filters, onFiltersChange, projects }) {
 
   const resetFilters = () => {
     const defaultFilters = {
-      status: "all",
-      priority: "all",
-      project: "all",
-      board: "all",
       search: "",
+      status: [],
+      priority: [],
+      project: "",
+      board: "",
       dateFrom: "",
       dateTo: "",
       sortBy: "createdAt",
@@ -69,47 +69,30 @@ function TaskFilters({ filters, onFiltersChange, projects }) {
 
     setDateFrom("");
     setDateTo("");
-    setSearchTerm("");
     onFiltersChange(defaultFilters);
   };
-
-  const getActiveFilterCount = () => {
-    let count = 0;
-    if (filters.status && filters.status !== "all" && filters.status.length > 0)
-      count++;
-    if (
-      filters.priority &&
-      filters.priority !== "all" &&
-      filters.priority.length > 0
-    )
-      count++;
-    if (filters.project && filters.project !== "all") count++;
-    if (filters.board && filters.board !== "all") count++;
-    if (filters.search) count++;
-    if (filters.dateFrom) count++;
-    if (filters.dateTo) count++;
-    return count;
-  };
-
-  const activeFilterCount = getActiveFilterCount();
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
       {/* Search Bar and Presets */}
       <div className="flex gap-4 mb-4">
-        <div className="flex-1 relative">
-          <input
-            type="text"
+        <div className="flex-1">
+          <RealTimeSearch
+            onSearch={handleSearchChange}
+            initialValue={filters.search || ""}
             placeholder="Search tasks..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              handleSearchChange(e.target.value);
-            }}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
+        </div>
+
+        <FilterPresets filters={filters} onFiltersChange={onFiltersChange} />
+
+        {/* Analytics Button */}
+        <button
+          onClick={() => setShowAnalytics(true)}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
+        >
           <svg
-            className="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
+            className="w-4 h-4"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -118,13 +101,18 @@ function TaskFilters({ filters, onFiltersChange, projects }) {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
             />
           </svg>
-        </div>
-
-        <FilterPresets filters={filters} onFiltersChange={onFiltersChange} />
+          Analytics
+        </button>
       </div>
+
+      {/* Search Analytics Modal */}
+      <SearchAnalytics
+        isVisible={showAnalytics}
+        onClose={() => setShowAnalytics(false)}
+      />
 
       {/* Basic Filters */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
@@ -214,21 +202,14 @@ function TaskFilters({ filters, onFiltersChange, projects }) {
             />
           </svg>
           {showAdvanced ? "Hide" : "Show"} Advanced Filters
-          {activeFilterCount > 0 && (
-            <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">
-              {activeFilterCount}
-            </span>
-          )}
         </button>
 
-        {activeFilterCount > 0 && (
-          <button
-            onClick={resetFilters}
-            className="text-red-600 hover:text-red-700 text-sm font-medium"
-          >
-            Reset All Filters
-          </button>
-        )}
+        <button
+          onClick={resetFilters}
+          className="text-red-600 hover:text-red-700 text-sm font-medium"
+        >
+          Reset All Filters
+        </button>
       </div>
 
       {/* Advanced Filters */}
@@ -244,14 +225,14 @@ function TaskFilters({ filters, onFiltersChange, projects }) {
                 <input
                   type="date"
                   value={dateFrom}
-                  onChange={(e) => handleDateChange("from", e.target.value)}
+                  onChange={(e) => handleDateChange("dateFrom", e.target.value)}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="From"
                 />
                 <input
                   type="date"
                   value={dateTo}
-                  onChange={(e) => handleDateChange("to", e.target.value)}
+                  onChange={(e) => handleDateChange("dateTo", e.target.value)}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="To"
                 />

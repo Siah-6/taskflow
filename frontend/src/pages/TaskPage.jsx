@@ -28,29 +28,60 @@ function TaskPage() {
   });
 
   const fetchTasks = useCallback(async () => {
+    let loadingTimeout;
     try {
       setLoading(true);
+      console.log("Fetching tasks...");
+      console.log("Token:", token ? "exists" : "missing");
+      console.log("Filters:", filters);
+
+      // Force loading to stop after 10 seconds
+      loadingTimeout = setTimeout(() => {
+        console.log("Forcing loading to stop due to timeout");
+        setLoading(false);
+        setError(
+          "Request timed out. Please check your connection and try again.",
+        );
+      }, 10000);
 
       // Build query string from filters
       const queryParams = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
-        if (value && value !== "all") {
-          queryParams.append(key, value);
+        if (
+          value &&
+          value !== "all" &&
+          value !== "" &&
+          (!Array.isArray(value) || value.length > 0)
+        ) {
+          if (Array.isArray(value)) {
+            value.forEach((v) => queryParams.append(key, v));
+          } else {
+            queryParams.append(key, value);
+          }
         }
       });
 
-      const response = await axios.get(
-        `http://localhost:5000/api/tasks?${queryParams.toString()}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const url = `http://localhost:5000/api/tasks?${queryParams.toString()}`;
+      console.log("Fetching from URL:", url);
+
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("Tasks response:", response.data);
       setTasks(response.data);
       setError("");
     } catch (error) {
       console.error("Error fetching tasks:", error);
-      setError("Failed to fetch tasks");
+      console.error("Error response:", error.response?.data);
+      setError(
+        "Failed to fetch tasks: " +
+          (error.response?.data?.message || error.message),
+      );
     } finally {
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+      }
+      console.log("Setting loading to false");
       setLoading(false);
     }
   }, [token, filters]);
@@ -59,13 +90,23 @@ function TaskPage() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
+        console.log("Fetching projects...");
         const token = localStorage.getItem("token");
+        console.log("Token:", token ? "exists" : "missing");
+
         const response = await axios.get("http://localhost:5000/api/projects", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        console.log("Projects response:", response.data);
         setProjects(response.data);
       } catch (error) {
         console.error("Error fetching projects:", error);
+        console.error("Error response:", error.response?.data);
+        setError(
+          "Failed to fetch projects: " +
+            (error.response?.data?.message || error.message),
+        );
+        setProjects([]); // Add this line to set projects to an empty array on error
       }
     };
 
@@ -179,6 +220,7 @@ function TaskPage() {
           filters={filters}
           onFiltersChange={setFilters}
           projects={projects}
+          tasks={tasks}
         />
 
         {showForm && (
