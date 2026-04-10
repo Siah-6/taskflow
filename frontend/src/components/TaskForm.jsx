@@ -8,6 +8,7 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
     status: initialData.status || "To Do",
     priority: initialData.priority || "Medium",
     project: initialData.project || "",
+    dueDate: initialData.dueDate || "",
   });
 
   const [errors, setErrors] = useState({});
@@ -202,6 +203,23 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
         {loadingProjects && (
           <p className="text-xs text-slate-500 mt-1">Loading projects...</p>
         )}
+      </div>
+
+      <div>
+        <label
+          htmlFor="dueDate"
+          className="block text-sm font-medium text-slate-700 mb-1"
+        >
+          Due Date
+        </label>
+        <input
+          type="date"
+          id="dueDate"
+          name="dueDate"
+          value={formData.dueDate}
+          onChange={handleChange}
+          className="input-field"
+        />
       </div>
 
       <div className="flex gap-3 pt-4">

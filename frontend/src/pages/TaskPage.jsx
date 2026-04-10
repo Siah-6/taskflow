@@ -13,6 +13,7 @@ function TaskPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [notification, setNotification] = useState("");
 
   // Enhanced filters state
   const [filters, setFilters] = useState({
@@ -132,8 +133,10 @@ function TaskPage() {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-      setTasks([response.data.task, ...tasks]);
+      setTasks([response.data, ...tasks]);
       setShowForm(false);
+      setNotification("Task created successfully!");
+      setTimeout(() => setNotification(""), 3000);
       setError("");
     } catch (error) {
       console.error("Error creating task:", error);
@@ -214,6 +217,13 @@ function TaskPage() {
         </div>
 
         {error && <div className="alert-error mb-6">{error}</div>}
+
+        {/* Success Notification */}
+        {notification && (
+          <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-pulse">
+            {notification}
+          </div>
+        )}
 
         {/* Enhanced Filters */}
         <TaskFilters
