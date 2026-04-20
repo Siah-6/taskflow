@@ -5,7 +5,7 @@ import TaskList from "../components/TaskList";
 import TaskForm from "../components/TaskForm";
 import TaskFilters from "../components/TaskFilters";
 
-function TaskPage() {
+function TaskPage({ selectedProject }) {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [tasks, setTasks] = useState([]);
@@ -27,6 +27,21 @@ function TaskPage() {
     sortBy: "createdAt",
     sortOrder: "desc",
   });
+
+  // Update filters when selectedProject changes
+  useEffect(() => {
+    if (selectedProject) {
+      setFilters(prev => ({
+        ...prev,
+        project: selectedProject._id
+      }));
+    } else {
+      setFilters(prev => ({
+        ...prev,
+        project: "all"
+      }));
+    }
+  }, [selectedProject]);
 
   const fetchTasks = useCallback(async () => {
     let loadingTimeout;
@@ -193,12 +208,19 @@ function TaskPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="py-8 px-6">
+      <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">My Tasks</h1>
-            <p className="text-slate-600">Manage your tasks efficiently</p>
+            <h1 className="text-3xl font-bold text-slate-900">
+              {selectedProject ? selectedProject.name : "My Tasks"}
+            </h1>
+            <p className="text-slate-600">
+              {selectedProject 
+                ? `Manage tasks for ${selectedProject.name}` 
+                : "Manage your tasks efficiently"
+              }
+            </p>
           </div>
           <div className="flex gap-4">
             <button
@@ -209,9 +231,6 @@ function TaskPage() {
             </button>
             <button onClick={() => setShowForm(true)} className="btn-primary">
               Create Task
-            </button>
-            <button onClick={handleLogout} className="btn-secondary">
-              Logout
             </button>
           </div>
         </div>

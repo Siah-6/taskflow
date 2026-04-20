@@ -2,19 +2,19 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProjectList from "../components/ProjectList";
 
-function ProjectsPage() {
+function ProjectsPage({ selectedProject }) {
   const navigate = useNavigate();
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [localSelectedProject, setLocalSelectedProject] = useState(null);
 
   const handleProjectSelect = (project) => {
-    setSelectedProject(project);
+    setLocalSelectedProject(project);
     // Navigate to project detail page
     navigate(`/projects/${project._id}`);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="py-8 px-6">
+      <div className="max-w-6xl mx-auto">
         <ProjectList onProjectSelect={handleProjectSelect} />
       </div>
     </div>

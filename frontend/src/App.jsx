@@ -5,17 +5,34 @@ import SignUpPage from "./pages/SignUpPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
 import ProjectDashboard from "./pages/ProjectDashboard";
+import Layout from "./components/Layout";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<TaskPage />} />
-        <Route path="/dashboard" element={<ProjectDashboard />} />
-        <Route path="/projects" element={<ProjectsPage />} />
-        <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/" element={
+          <Layout>
+            <TaskPage />
+          </Layout>
+        } />
+        <Route path="/dashboard" element={
+          <Layout>
+            <ProjectDashboard />
+          </Layout>
+        } />
+        <Route path="/projects" element={
+          <Layout>
+            <ProjectsPage />
+          </Layout>
+        } />
+        <Route path="/projects/:projectId" element={
+          <Layout>
+            <ProjectDetailPage />
+          </Layout>
+        } />
       </Routes>
     </BrowserRouter>
   );

@@ -5,7 +5,7 @@ import TaskList from "../components/TaskList";
 import TaskForm from "../components/TaskForm";
 import BoardManagement from "../components/BoardManagement";
 
-function ProjectDetailPage() {
+function ProjectDetailPage({ selectedProject }) {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
@@ -159,8 +159,8 @@ function ProjectDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="py-8 px-6">
+      <div className="max-w-6xl mx-auto">
         {/* Project Header */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex justify-between items-start">
