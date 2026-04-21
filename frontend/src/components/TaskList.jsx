@@ -1,3 +1,4 @@
+import { useState } from "react";
 import TaskItem from "./TaskItem";
 
 function TaskList({
@@ -12,6 +13,7 @@ function TaskList({
     { name: "Done", color: "#10B981" },
   ],
 }) {
+  const [dragOverBoard, setDragOverBoard] = useState(null);
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -59,6 +61,32 @@ function TaskList({
     });
   };
 
+  const handleDragOver = (e, boardName) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverBoard(boardName);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverBoard(null);
+  };
+
+  const handleDrop = (e, boardName) => {
+    e.preventDefault();
+    setDragOverBoard(null);
+    
+    const taskId = e.dataTransfer.getData('taskId');
+    const taskStatus = e.dataTransfer.getData('taskStatus');
+    
+    if (taskId && boardName !== taskStatus) {
+      // Update task status locally
+      onUpdateTask(taskId, { 
+        status: boardName, 
+        board: boardName 
+      });
+    }
+  };
+
   return (
     <div className="grid grid-cols-3 gap-4">
       {boards.map((board) => {
@@ -67,7 +95,14 @@ function TaskList({
         return (
           <div
             key={board.name}
-            className="bg-white rounded-lg border border-gray-200"
+            className={`bg-white rounded-lg border-2 transition-colors ${
+              dragOverBoard === board.name 
+                ? "border-blue-400 bg-blue-50" 
+                : "border-gray-200"
+            }`}
+            onDragOver={(e) => handleDragOver(e, board.name)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, board.name)}
           >
             <div className="px-4 py-3 border-b border-gray-100">
               <div className="flex items-center justify-between">

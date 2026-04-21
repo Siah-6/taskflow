@@ -53,6 +53,17 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
     }
   };
 
+  const handleDragStart = (e) => {
+    e.dataTransfer.setData('taskId', task._id);
+    e.dataTransfer.setData('taskStatus', task.status);
+    e.dataTransfer.effectAllowed = 'move';
+    e.target.style.opacity = '0.5';
+  };
+
+  const handleDragEnd = (e) => {
+    e.target.style.opacity = '1';
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Completed":
@@ -151,7 +162,12 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
           </div>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-md p-3 hover:shadow-sm transition-shadow cursor-pointer">
+        <div 
+          className="bg-white border border-gray-200 rounded-md p-3 hover:shadow-sm transition-shadow cursor-move"
+          draggable
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
           <div className="space-y-2">
             {/* Task Header */}
             <div className="flex items-start justify-between gap-2">
