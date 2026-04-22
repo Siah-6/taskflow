@@ -52,12 +52,8 @@ function TaskList({
   // Group tasks by board
   const getTasksForBoard = (boardName) => {
     return tasks.filter((task) => {
-      // First check if task has a board assigned
-      if (task.board) {
-        return task.board === boardName;
-      }
-      // Fall back to status if no board is assigned
-      return task.status === boardName;
+      // Check both board and status for compatibility
+      return task.board === boardName || task.status === boardName;
     });
   };
 
@@ -79,7 +75,7 @@ function TaskList({
     const taskStatus = e.dataTransfer.getData('taskStatus');
     
     if (taskId && boardName !== taskStatus) {
-      // Update task status locally
+      // Update task status via existing API
       onUpdateTask(taskId, { 
         status: boardName, 
         board: boardName 

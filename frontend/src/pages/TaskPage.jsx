@@ -14,6 +14,7 @@ function TaskPage({ selectedProject }) {
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [notification, setNotification] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Enhanced filters state
   const [filters, setFilters] = useState({
@@ -139,6 +140,13 @@ function TaskPage({ selectedProject }) {
     fetchTasks();
   }, [token, navigate, fetchTasks]);
 
+  // Fetch tasks when filters change
+  useEffect(() => {
+    if (token) {
+      fetchTasks();
+    }
+  }, [filters, token]);
+
   const handleCreateTask = async (taskData) => {
     try {
       const response = await axios.post(
@@ -161,6 +169,7 @@ function TaskPage({ selectedProject }) {
 
   const handleUpdateTask = async (taskId, updateData) => {
     try {
+      setIsUpdating(true);
       const response = await axios.put(
         `http://localhost:5000/api/tasks/${taskId}`,
         updateData,
@@ -175,6 +184,10 @@ function TaskPage({ selectedProject }) {
     } catch (error) {
       console.error("Error updating task:", error);
       setError(error.response?.data?.message || "Failed to update task");
+      // Refetch tasks to ensure correct state on error
+      fetchTasks();
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -273,14 +286,14 @@ function TaskPage({ selectedProject }) {
 
           <TaskList
             tasks={tasks}
-            loading={loading}
+            loading={loading || isUpdating}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
             onRefresh={fetchTasks}
             boards={[
               { name: "To Do", color: "#6B7280" },
               { name: "In Progress", color: "#3B82F6" },
-              { name: "Completed", color: "#10B981" },
+              { name: "Done", color: "#10B981" },
             ]}
           />
         </div>
