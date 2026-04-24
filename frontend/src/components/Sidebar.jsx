@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
-function Sidebar({ selectedProject, onProjectSelect }) {
+function Sidebar({ onCreateProject }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [projects, setProjects] = useState([]);
@@ -31,11 +31,18 @@ function Sidebar({ selectedProject, onProjectSelect }) {
   };
 
   const handleProjectClick = (project) => {
-    onProjectSelect(project);
-    navigate("/");
+    navigate(`/projects/${project._id}`);
+  };
+
+  const handleCreateProject = () => {
+    if (onCreateProject) {
+      onCreateProject();
+    }
   };
 
   const isActive = (path) => location.pathname === path;
+  
+  const isProjectActive = (projectId) => location.pathname === `/projects/${projectId}`;
 
   return (
     <div className="w-64 bg-white h-screen fixed left-0 top-0 flex flex-col border-r border-gray-200">
@@ -64,38 +71,6 @@ function Sidebar({ selectedProject, onProjectSelect }) {
           </button>
 
           <button
-            onClick={() => handleNavigation("/")}
-            className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-              isActive("/") && !selectedProject
-                ? "bg-blue-50 text-blue-600 font-medium"
-                : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              My Tasks
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleNavigation("/projects")}
-            className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-              isActive("/projects")
-                ? "bg-blue-50 text-blue-600 font-medium"
-                : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              Projects
-            </div>
-          </button>
-
-          <button
             className="w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
           >
             <div className="flex items-center gap-3">
@@ -110,9 +85,23 @@ function Sidebar({ selectedProject, onProjectSelect }) {
 
         {/* Projects Section */}
         <div className="mt-8">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-            Projects
-          </h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 
+              onClick={() => handleNavigation("/projects")}
+              className="text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700 transition-colors"
+            >
+              PROJECTS
+            </h3>
+            <button
+              onClick={handleCreateProject}
+              className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+              title="Create new project"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+          </div>
           <div className="space-y-1">
             {loading ? (
               <div className="px-3 py-2 text-gray-500 text-sm">Loading projects...</div>
@@ -124,7 +113,7 @@ function Sidebar({ selectedProject, onProjectSelect }) {
                   key={project._id}
                   onClick={() => handleProjectClick(project)}
                   className={`w-full text-left px-3 py-2 rounded-md transition-colors text-sm ${
-                    selectedProject?._id === project._id
+                    isProjectActive(project._id)
                       ? "bg-blue-50 text-blue-600 font-medium"
                       : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                   }`}

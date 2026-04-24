@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import TaskPage from "./pages/TaskPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import ProjectsPage from "./pages/ProjectsPage";
@@ -13,11 +12,6 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/" element={
-          <Layout>
-            <TaskPage />
-          </Layout>
-        } />
         <Route path="/dashboard" element={
           <Layout>
             <ProjectDashboard />
@@ -31,6 +25,11 @@ function App() {
         <Route path="/projects/:projectId" element={
           <Layout>
             <ProjectDetailPage />
+          </Layout>
+        } />
+        <Route path="/" element={
+          <Layout>
+            <ProjectsPage />
           </Layout>
         } />
       </Routes>

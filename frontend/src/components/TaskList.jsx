@@ -84,14 +84,14 @@ function TaskList({
   };
 
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="flex gap-4 max-w-6xl mx-auto">
       {boards.map((board) => {
         const boardTasks = getTasksForBoard(board.name);
 
         return (
           <div
             key={board.name}
-            className={`bg-white rounded-lg border-2 transition-colors ${
+            className={`flex-1 bg-white rounded-lg border-2 transition-colors ${
               dragOverBoard === board.name 
                 ? "border-blue-400 bg-blue-50" 
                 : "border-gray-200"

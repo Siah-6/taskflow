@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-function TaskForm({ onSubmit, onCancel, initialData = {} }) {
+function TaskForm({ onSubmit, onCancel, initialData = {}, hideProjectField = false }) {
   const [formData, setFormData] = useState({
     title: initialData.title || "",
     description: initialData.description || "",
@@ -84,15 +84,15 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">
+        <h3 className="text-lg font-semibold text-slate-900 mb-6">
           {initialData._id ? "Edit Task" : "Create New Task"}
         </h3>
       </div>
 
-      <div>
+      <div className="mb-4">
         <label
           htmlFor="title"
-          className="block text-sm font-medium text-slate-700 mb-1"
+          className="block text-sm font-medium text-slate-700 mb-2"
         >
           Title *
         </label>
@@ -103,17 +103,19 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
           value={formData.title}
           onChange={handleChange}
           placeholder="Enter task title..."
-          className={`input-field ${errors.title ? "border-red-300 focus:ring-red-500" : ""}`}
+          className={`w-full h-11 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+            errors.title ? "border-red-300 focus:ring-red-500" : ""
+          }`}
         />
         {errors.title && (
           <p className="mt-1 text-sm text-red-600">{errors.title}</p>
         )}
       </div>
 
-      <div>
+      <div className="mb-4">
         <label
           htmlFor="description"
-          className="block text-sm font-medium text-slate-700 mb-1"
+          className="block text-sm font-medium text-slate-700 mb-2"
         >
           Description
         </label>
@@ -123,8 +125,10 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
           value={formData.description}
           onChange={handleChange}
           placeholder="Enter task description (optional)..."
-          rows={4}
-          className={`input-field ${errors.description ? "border-red-300 focus:ring-red-500" : ""}`}
+          rows={3}
+          className={`w-full px-3 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none ${
+            errors.description ? "border-red-300 focus:ring-red-500" : ""
+          }`}
         />
         {errors.description && (
           <p className="mt-1 text-sm text-red-600">{errors.description}</p>
@@ -134,10 +138,10 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
         </p>
       </div>
 
-      <div>
+      <div className="mb-4">
         <label
           htmlFor="status"
-          className="block text-sm font-medium text-slate-700 mb-1"
+          className="block text-sm font-medium text-slate-700 mb-2"
         >
           Status
         </label>
@@ -146,7 +150,7 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
           name="status"
           value={formData.status}
           onChange={handleChange}
-          className="input-field"
+          className="w-full h-11 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
         >
           {statusOptions.map((status) => (
             <option key={status} value={status}>
@@ -156,10 +160,10 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
         </select>
       </div>
 
-      <div>
+      <div className="mb-4">
         <label
           htmlFor="priority"
-          className="block text-sm font-medium text-slate-700 mb-1"
+          className="block text-sm font-medium text-slate-700 mb-2"
         >
           Priority
         </label>
@@ -168,7 +172,7 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
           name="priority"
           value={formData.priority}
           onChange={handleChange}
-          className="input-field"
+          className="w-full h-11 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
         >
           {priorityOptions.map((priority) => (
             <option key={priority} value={priority}>
@@ -178,37 +182,39 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
         </select>
       </div>
 
-      <div>
-        <label
-          htmlFor="project"
-          className="block text-sm font-medium text-slate-700 mb-1"
-        >
-          Project
-        </label>
-        <select
-          id="project"
-          name="project"
-          value={formData.project}
-          onChange={handleChange}
-          className="input-field"
-          disabled={loadingProjects}
-        >
-          <option value="">No Project</option>
-          {projects.map((project) => (
-            <option key={project._id} value={project._id}>
-              {project.name}
-            </option>
-          ))}
-        </select>
-        {loadingProjects && (
-          <p className="text-xs text-slate-500 mt-1">Loading projects...</p>
-        )}
-      </div>
+      {!hideProjectField && (
+        <div className="mb-4">
+          <label
+            htmlFor="project"
+            className="block text-sm font-medium text-slate-700 mb-2"
+          >
+            Project
+          </label>
+          <select
+            id="project"
+            name="project"
+            value={formData.project}
+            onChange={handleChange}
+            className="w-full h-11 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+            disabled={loadingProjects}
+          >
+            <option value="">No Project</option>
+            {projects.map((project) => (
+              <option key={project._id} value={project._id}>
+                {project.name}
+              </option>
+            ))}
+          </select>
+          {loadingProjects && (
+            <p className="text-xs text-slate-500 mt-1">Loading projects...</p>
+          )}
+        </div>
+      )}
 
-      <div>
+      <div className="mb-6">
         <label
           htmlFor="dueDate"
-          className="block text-sm font-medium text-slate-700 mb-1"
+          className="block text-sm font-medium text-slate-700 mb-2"
         >
           Due Date
         </label>
@@ -218,15 +224,22 @@ function TaskForm({ onSubmit, onCancel, initialData = {} }) {
           name="dueDate"
           value={formData.dueDate}
           onChange={handleChange}
-          className="input-field"
+          className="w-full h-11 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
         />
       </div>
 
       <div className="flex gap-3 pt-4">
-        <button type="submit" className="btn-primary">
+        <button 
+          type="submit" 
+          className="flex-1 h-11 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-sm"
+        >
           {initialData._id ? "Update Task" : "Create Task"}
         </button>
-        <button type="button" onClick={onCancel} className="btn-secondary">
+        <button 
+          type="button" 
+          onClick={onCancel} 
+          className="flex-1 h-11 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200"
+        >
           Cancel
         </button>
       </div>

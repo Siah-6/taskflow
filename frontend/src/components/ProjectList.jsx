@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ProjectCard from "./ProjectCard";
-import CreateProject from "./CreateProject";
 
-function ProjectList({ onProjectSelect }) {
+function ProjectList({ onProjectSelect, onCreateProject, onProjectCreated }) {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [showCreateForm, setShowCreateForm] = useState(false);
 
   const fetchProjects = async () => {
     try {
@@ -32,6 +30,9 @@ function ProjectList({ onProjectSelect }) {
 
   const handleCreateProject = (newProject) => {
     setProjects([newProject, ...projects]);
+    if (onProjectCreated) {
+      onProjectCreated(newProject);
+    }
   };
 
   const handleProjectClick = (project) => {
@@ -90,7 +91,7 @@ function ProjectList({ onProjectSelect }) {
           </p>
         </div>
         <button
-          onClick={() => setShowCreateForm(true)}
+          onClick={onCreateProject}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
         >
           <svg
@@ -135,7 +136,7 @@ function ProjectList({ onProjectSelect }) {
             Create your first project to get started!
           </p>
           <button
-            onClick={() => setShowCreateForm(true)}
+            onClick={onCreateProject}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Create Your First Project
@@ -151,14 +152,6 @@ function ProjectList({ onProjectSelect }) {
             />
           ))}
         </div>
-      )}
-
-      {/* Create Project Modal */}
-      {showCreateForm && (
-        <CreateProject
-          onClose={() => setShowCreateForm(false)}
-          onSuccess={handleCreateProject}
-        />
       )}
     </div>
   );

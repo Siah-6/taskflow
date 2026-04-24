@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import ProjectList from "../components/ProjectList";
 
-function ProjectsPage({ selectedProject }) {
+function ProjectsPage({ onCreateProject, onProjectCreated }) {
   const navigate = useNavigate();
-  const [localSelectedProject, setLocalSelectedProject] = useState(null);
 
   const handleProjectSelect = (project) => {
-    setLocalSelectedProject(project);
     // Navigate to project detail page
     navigate(`/projects/${project._id}`);
   };
@@ -15,7 +13,11 @@ function ProjectsPage({ selectedProject }) {
   return (
     <div className="py-8 px-6">
       <div className="max-w-6xl mx-auto">
-        <ProjectList onProjectSelect={handleProjectSelect} />
+        <ProjectList 
+          onProjectSelect={handleProjectSelect}
+          onCreateProject={onCreateProject}
+          onProjectCreated={onProjectCreated}
+        />
       </div>
     </div>
   );

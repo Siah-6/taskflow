@@ -2,18 +2,21 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import TaskList from "../components/TaskList";
-import TaskForm from "../components/TaskForm";
+import TaskModal from "../components/TaskModal";
 import BoardManagement from "../components/BoardManagement";
+import ProjectFilters from "../components/ProjectFilters";
 
-function ProjectDetailPage({ selectedProject }) {
+function ProjectDetailPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [showForm, setShowForm] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
   const [showBoardManagement, setShowBoardManagement] = useState(false);
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('dueDate');
 
   useEffect(() => {
     const loadData = async () => {
@@ -29,19 +32,16 @@ function ProjectDetailPage({ selectedProject }) {
         );
         setProject(projectResponse.data);
 
-        // Fetch tasks
+        // Fetch tasks for this project only (no filters needed for project detail page)
         const tasksResponse = await axios.get(
-          "http://localhost:5000/api/tasks",
+          `http://localhost:5000/api/tasks?project=${projectId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
         );
-
-        // Filter tasks for this project
-        const projectTasks = tasksResponse.data.filter(
-          (task) => task.project && task.project._id === projectId,
-        );
-        setTasks(projectTasks);
+        
+        setTasks(tasksResponse.data);
+        setError("");
       } catch (error) {
         console.error("Error loading data:", error);
         setError("Failed to load project data");
@@ -60,20 +60,17 @@ function ProjectDetailPage({ selectedProject }) {
       const token = localStorage.getItem("token");
       const response = await axios.post(
         "http://localhost:5000/api/tasks",
-        {
-          ...taskData,
-          project: projectId,
-        },
+        taskData,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
 
-      setTasks([response.data.task, ...tasks]);
-      setShowForm(false);
+      setTasks([response.data.task || response.data, ...tasks]);
+      setError("");
     } catch (error) {
       console.error("Error creating task:", error);
-      setError("Failed to create task");
+      setError("Failed to create task: " + (error.response?.data?.message || error.message));
     }
   };
 
@@ -107,6 +104,35 @@ function ProjectDetailPage({ selectedProject }) {
       console.error("Error deleting task:", error);
       setError("Failed to delete task");
     }
+  };
+
+  // Filter and sort tasks
+  const getFilteredAndSortedTasks = () => {
+    let filteredTasks = tasks;
+
+    // Filter by priority
+    if (priorityFilter !== 'all') {
+      filteredTasks = filteredTasks.filter(task => task.priority === priorityFilter);
+    }
+
+    // Sort tasks
+    const sortedTasks = [...filteredTasks].sort((a, b) => {
+      if (sortBy === 'dueDate') {
+        // Handle null/undefined due dates
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1; // Tasks without due dates go last
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate) - new Date(b.dueDate);
+      } else if (sortBy === 'priority') {
+        const priorityOrder = { 'High': 0, 'Medium': 1, 'Low': 2 };
+        const aPriority = priorityOrder[a.priority] || 3;
+        const bPriority = priorityOrder[b.priority] || 3;
+        return aPriority - bPriority;
+      }
+      return 0;
+    });
+
+    return sortedTasks;
   };
 
   const handleBoardsUpdate = (newBoards) => {
@@ -207,7 +233,7 @@ function ProjectDetailPage({ selectedProject }) {
                 Manage Boards
               </button>
               <button
-                onClick={() => setShowForm(true)}
+                onClick={() => setShowTaskModal(true)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
               >
                 <svg
@@ -236,20 +262,21 @@ function ProjectDetailPage({ selectedProject }) {
           </div>
         )}
 
-        {/* Task Form */}
-        {showForm && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <TaskForm
-              onSubmit={handleCreateTask}
-              onCancel={() => setShowForm(false)}
-            />
-          </div>
-        )}
+        
+        {/* Project Filters */}
+        <div className="mb-4">
+          <ProjectFilters
+            priorityFilter={priorityFilter}
+            sortBy={sortBy}
+            onPriorityChange={setPriorityFilter}
+            onSortChange={setSortBy}
+          />
+        </div>
 
         {/* Task List with Dynamic Boards */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <TaskList
-            tasks={tasks}
+            tasks={getFilteredAndSortedTasks()}
             loading={false}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
@@ -265,6 +292,14 @@ function ProjectDetailPage({ selectedProject }) {
             onClose={() => setShowBoardManagement(false)}
           />
         )}
+
+        {/* Task Creation Modal */}
+        <TaskModal
+          isOpen={showTaskModal}
+          onClose={() => setShowTaskModal(false)}
+          onSubmit={handleCreateTask}
+          projectId={projectId}
+        />
       </div>
     </div>
   );
