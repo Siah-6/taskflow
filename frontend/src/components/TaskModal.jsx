@@ -1,7 +1,7 @@
 import React from 'react';
 import TaskForm from './TaskForm';
 
-function TaskModal({ isOpen, onClose, onSubmit, projectId }) {
+function TaskModal({ isOpen, onClose, onSubmit, projectId, initialData }) {
   if (!isOpen) return null;
 
   const handleBackdropClick = (e) => {
@@ -20,6 +20,8 @@ function TaskModal({ isOpen, onClose, onSubmit, projectId }) {
     onClose();
   };
 
+  const isEditMode = !!initialData && !!initialData._id;
+
   return (
     <div 
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
@@ -30,7 +32,7 @@ function TaskModal({ isOpen, onClose, onSubmit, projectId }) {
           <TaskForm 
             onSubmit={handleSubmit}
             onCancel={onClose}
-            initialData={{ project: projectId }}
+            initialData={initialData || { project: projectId }}
             hideProjectField={!!projectId}
           />
         </div>

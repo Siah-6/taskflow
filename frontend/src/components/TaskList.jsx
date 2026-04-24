@@ -6,7 +6,6 @@ function TaskList({
   loading,
   onUpdateTask,
   onDeleteTask,
-  onRefresh,
   boards = [
     { name: "To Do", color: "#6B7280" },
     { name: "In Progress", color: "#3B82F6" },
@@ -84,31 +83,31 @@ function TaskList({
   };
 
   return (
-    <div className="flex gap-4 max-w-6xl mx-auto">
+    <div className="flex gap-2 max-w-6xl mx-auto">
       {boards.map((board) => {
         const boardTasks = getTasksForBoard(board.name);
 
         return (
           <div
             key={board.name}
-            className={`flex-1 bg-white rounded-lg border-2 transition-colors ${
+            className={`flex-1 min-w-[280px] transition-colors ${
               dragOverBoard === board.name 
-                ? "border-blue-400 bg-blue-50" 
-                : "border-gray-200"
+                ? "bg-blue-50/20" 
+                : ""
             }`}
             onDragOver={(e) => handleDragOver(e, board.name)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, board.name)}
           >
-            <div className="px-4 py-3 border-b border-gray-100">
+            <div className="px-3 py-2 border-b border-gray-100">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">
+                <h3 className="text-sm font-medium text-gray-600">
                   {board.name}
                 </h3>
                 <span
-                  className="px-2 py-0.5 text-xs font-medium rounded-full"
+                  className="px-1.5 py-0.5 text-xs font-medium rounded-full"
                   style={{
-                    backgroundColor: board.color + "20",
+                    backgroundColor: board.color + "10",
                     color: board.color,
                   }}
                 >
@@ -116,7 +115,7 @@ function TaskList({
                 </span>
               </div>
             </div>
-            <div className="p-3 space-y-2 min-h-[500px] bg-gray-50/50">
+            <div className="p-2 space-y-2 min-h-[500px]">
               {boardTasks.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-xs text-gray-500">

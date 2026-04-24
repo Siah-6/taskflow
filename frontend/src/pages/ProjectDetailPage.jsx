@@ -274,15 +274,13 @@ function ProjectDetailPage() {
         </div>
 
         {/* Task List with Dynamic Boards */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-          <TaskList
-            tasks={getFilteredAndSortedTasks()}
-            loading={false}
-            onUpdateTask={handleUpdateTask}
-            onDeleteTask={handleDeleteTask}
-            boards={project.boards}
-          />
-        </div>
+        <TaskList
+          tasks={getFilteredAndSortedTasks()}
+          loading={false}
+          onUpdateTask={handleUpdateTask}
+          onDeleteTask={handleDeleteTask}
+          boards={project.boards}
+        />
 
         {/* Board Management Modal */}
         {showBoardManagement && (

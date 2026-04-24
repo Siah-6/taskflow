@@ -72,13 +72,23 @@ function TaskForm({ onSubmit, onCancel, initialData = {}, hideProjectField = fal
       return;
     }
 
-    onSubmit({
+    const submitData = {
       title: formData.title.trim(),
       description: formData.description.trim(),
       status: formData.status,
       priority: formData.priority,
       project: formData.project || null,
-    });
+      dueDate: formData.dueDate || null,
+    };
+
+    // Debug logging
+    console.log("=== TASK FORM SUBMIT DEBUG ===");
+    console.log("formData:", formData);
+    console.log("submitData:", submitData);
+    console.log("dueDate being sent:", submitData.dueDate);
+    console.log("============================");
+
+    onSubmit(submitData);
   };
 
   return (

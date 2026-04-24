@@ -1,50 +1,31 @@
 import { useState } from "react";
+import TaskModal from "./TaskModal";
 
 function TaskItem({ task, onUpdateTask, onDeleteTask }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({
-    title: task.title,
-    description: task.description,
-    status: task.status,
-    priority: task.priority || "Medium",
-    project: task.project || "",
-    dueDate: task.dueDate || "",
-  });
+  // Debug logging
+  console.log("=== TASK ITEM DEBUG ===");
+  console.log("task data:", task);
+  console.log("task.dueDate:", task.dueDate);
+  console.log("==================");
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const statusOptions = ["To Do", "In Progress", "Completed"];
   const priorityOptions = ["Low", "Medium", "High"];
 
   const handleEdit = () => {
-    setIsEditing(true);
-    setEditData({
-      title: task.title,
-      description: task.description,
-      status: task.status,
-      priority: task.priority || "Medium",
-      project: task.project || "",
-      dueDate: task.dueDate || "",
-    });
+    setShowEditModal(true);
   };
 
-  const handleSave = () => {
+  const handleUpdateTask = (taskData) => {
     // Sync board with status to ensure task appears in correct column
     const updatedData = {
-      ...editData,
-      board: editData.status, // Update board to match status
+      ...taskData,
+      board: taskData.status, // Update board to match status
     };
     onUpdateTask(task._id, updatedData);
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditData({
-      title: task.title,
-      description: task.description,
-      status: task.status,
-      priority: task.priority || "Medium",
-      project: task.project || "",
-    });
+    setShowEditModal(false);
   };
 
   const handleDelete = () => {
@@ -54,228 +35,176 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
   };
 
   const handleDragStart = (e) => {
-    e.dataTransfer.setData('taskId', task._id);
-    e.dataTransfer.setData('taskStatus', task.status);
+    setIsDragging(true);
     e.dataTransfer.effectAllowed = 'move';
-    e.target.style.opacity = '0.5';
+    e.dataTransfer.setData('taskId', task._id);
+    e.dataTransfer.setData('taskStatus', task.status || task.board);
+    
+    // Add dragging styles
+    e.target.style.opacity = '0.9';
+    e.target.style.transform = 'scale(1.05) rotate(2deg)';
+    e.target.style.zIndex = '1000';
+    e.target.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+    e.target.style.transition = 'none'; // Disable transition during drag
   };
 
   const handleDragEnd = (e) => {
-    e.target.style.opacity = '1';
+    setIsDragging(false);
+    // Reset styles
+    e.target.style.opacity = '';
+    e.target.style.transform = '';
+    e.target.style.zIndex = '';
+    e.target.style.boxShadow = '';
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Completed":
-        return "bg-green-100 text-green-800 border-green-200";
+      case "Done":
+        return "bg-[#DCFCE7] text-[#16A34A] border-[#DCFCE7]";
       case "In Progress":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-[#DBEAFE] text-[#2563EB] border-[#DBEAFE]";
+      case "To Do":
+        return "bg-[#E5E7EB] text-[#4B5563] border-[#E5E7EB]";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-[#E5E7EB] text-[#4B5563] border-[#E5E7EB]";
     }
   };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
       case "High":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-[#FEE2E2] text-[#DC2626] border-[#FCA5A5]";
       case "Medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-[#FEF3C7] text-[#D97706] border-[#FCD34D]";
+      case "Low":
+        return "bg-[#F1F5F9] text-[#475569] border-[#CBD5E1]";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-[#F1F5F9] text-[#475569] border-[#CBD5E1]";
     }
   };
 
   return (
-    <div className="card p-4 hover:shadow-md transition-shadow">
-      {isEditing ? (
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Title
-            </label>
-            <input
-              type="text"
-              value={editData.title}
-              onChange={(e) =>
-                setEditData({ ...editData, title: e.target.value })
-              }
-              className="input-field"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Description
-            </label>
-            <textarea
-              value={editData.description}
-              onChange={(e) =>
-                setEditData({ ...editData, description: e.target.value })
-              }
-              className="input-field"
-              rows={3}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Status
-            </label>
-            <select
-              value={editData.status}
-              onChange={(e) =>
-                setEditData({ ...editData, status: e.target.value })
-              }
-              className="input-field"
-            >
-              {statusOptions.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Priority
-            </label>
-            <select
-              value={editData.priority}
-              onChange={(e) =>
-                setEditData({ ...editData, priority: e.target.value })
-              }
-              className="input-field"
-            >
-              {priorityOptions.map((priority) => (
-                <option key={priority} value={priority}>
-                  {priority}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={handleSave} className="btn-primary">
-              Save
-            </button>
-            <button onClick={handleCancel} className="btn-secondary">
-              Cancel
-            </button>
-          </div>
+    <div className="relative">
+      {/* Task Card */}
+      <div 
+        className="bg-white border border-gray-200 rounded-[12px] p-4 hover:shadow-md transition-all duration-200 cursor-move shadow-sm hover:shadow-gray-200 hover:-translate-y-0.5"
+        draggable
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        {/* Title */}
+        <h4 className="text-sm font-medium text-gray-900 leading-tight mb-2">
+          {task.title}
+        </h4>
+
+        {/* Badges Row */}
+        <div className="flex items-center gap-1.5 mb-3">
+          {/* Status Badge - Primary */}
+          <span
+            className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium border ${getStatusColor(
+              task.status,
+            )}`}
+          >
+            {task.status}
+          </span>
+          
+          {/* Priority Badge - Secondary */}
+          <span
+            className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium border opacity-70 ${getPriorityColor(
+              task.priority || "Medium",
+            )}`}
+          >
+            {task.priority || "Medium"}
+          </span>
         </div>
-      ) : (
-        <div 
-          className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-move shadow-sm"
-          draggable
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="space-y-3">
-            {/* Task Header with Priority Badge */}
-            <div className="flex items-start justify-between gap-2">
-              <h4 className="text-base font-semibold text-gray-900 leading-tight flex-1">
-                {task.title}
-              </h4>
-              <span
-                className={`px-2 py-1 rounded text-xs font-medium border flex-shrink-0 ${getPriorityColor(
-                  task.priority || "Medium",
-                )}`}
-              >
-                {task.priority || "Medium"}
-              </span>
-            </div>
 
-            {/* Task Description */}
-            {task.description && (
-              <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
-                {task.description}
-              </p>
-            )}
-
-            {/* Spacer */}
-            <div className="flex-1"></div>
-
-            {/* Task Footer with Due Date and Status */}
-            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-              {/* Due Date */}
-              <div className="flex items-center gap-1">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                <span className="text-xs text-gray-500">
-                  {task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric' 
-                  }) : 'No due date'}
-                </span>
-              </div>
-
-              {/* Status Badge */}
-              <span
-                className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(
-                  task.status,
-                )}`}
-              >
-                {task.status}
-              </span>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-1 opacity-0 hover:opacity-100 transition-opacity">
-              <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    handleEdit();
-                  }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-1"
-              >
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-              </button>
-              <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete();
-                  }}
-                  className="text-gray-400 hover:text-red-600 transition-colors p-1"
-              >
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
-            </div>
+        {/* Description */}
+        {task.description && (
+          <div className="mb-3">
+            <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
+              {task.description}
+            </p>
           </div>
+        )}
+
+        {/* Due Date - Bottom Only */}
+        <div className="flex items-center gap-1">
+          <svg
+            className="w-3 h-3 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+          <span className="text-xs text-gray-400">
+            {task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric' 
+            }) : 'No due date'}
+          </span>
         </div>
-      )}
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-1 opacity-0 hover:opacity-100 transition-opacity">
+          <button
+            onClick={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+          >
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+          </button>
+          <button
+            onClick={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
+            className="text-gray-400 hover:text-red-600 transition-colors p-1"
+          >
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Edit Modal */}
+      <TaskModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleUpdateTask}
+        initialData={task}
+        hideProjectField={true}
+      />
     </div>
   );
 }
