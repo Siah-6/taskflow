@@ -1,5 +1,6 @@
 import { useState } from "react";
 import TaskModal from "./TaskModal";
+import TaskDetailsModal from "./TaskDetailsModal";
 
 function TaskItem({ task, onUpdateTask, onDeleteTask }) {
   // Debug logging
@@ -10,6 +11,7 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
 
   const [isDragging, setIsDragging] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const statusOptions = ["To Do", "In Progress", "Completed"];
   const priorityOptions = ["Low", "Medium", "High"];
@@ -32,6 +34,14 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
     if (window.confirm("Are you sure you want to delete this task?")) {
       onDeleteTask(task._id);
     }
+  };
+
+  const handleCardClick = (e) => {
+    // Prevent opening modal if clicking on action buttons or if dragging
+    if (e.target.closest('button') || isDragging) {
+      return;
+    }
+    setShowDetailsModal(true);
   };
 
   const handleDragStart = (e) => {
@@ -91,6 +101,7 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
         draggable
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onClick={handleCardClick}
       >
         {/* Title */}
         <h4 className="text-sm font-medium text-gray-900 leading-tight mb-2">
@@ -204,6 +215,15 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
         onSubmit={handleUpdateTask}
         initialData={task}
         hideProjectField={true}
+      />
+
+      {/* Details Modal */}
+      <TaskDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        task={task}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
     </div>
   );
