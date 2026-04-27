@@ -5,6 +5,7 @@ import TaskList from "../components/TaskList";
 import TaskModal from "../components/TaskModal";
 import BoardManagement from "../components/BoardManagement";
 import ProjectFilters from "../components/ProjectFilters";
+import CollaboratorManager from "../components/CollaboratorManager";
 
 function ProjectDetailPage() {
   const { projectId } = useParams();
@@ -139,6 +140,10 @@ function ProjectDetailPage() {
     setProject((prev) => ({ ...prev, boards: newBoards }));
   };
 
+  const handleProjectUpdate = (updatedProject) => {
+    setProject(updatedProject);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -253,6 +258,14 @@ function ProjectDetailPage() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Collaborator Management */}
+        <div className="mb-6">
+          <CollaboratorManager 
+            project={project} 
+            onProjectUpdate={handleProjectUpdate} 
+          />
         </div>
 
         {/* Error Display */}

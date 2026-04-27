@@ -35,6 +35,13 @@ const projectSchema = new mongoose.Schema(
         },
       },
     ],
+    collaborators: [
+      {
+        type: String,
+        trim: true,
+        lowercase: true,
+      },
+    ],
     boards: [
       {
         name: {

@@ -4,16 +4,25 @@ import mongoose from "mongoose";
 // CREATE a new project
 export const createProject = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, collaborators } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: "Project name is required" });
+    }
+
+    // Process collaborators if provided
+    let processedCollaborators = [];
+    if (collaborators && Array.isArray(collaborators)) {
+      processedCollaborators = collaborators
+        .map(email => email.toLowerCase().trim())
+        .filter(email => email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
     }
 
     const project = await Project.create({
       name,
       description,
       owner: req.user.userId,
+      collaborators: processedCollaborators,
       members: [
         {
           user: req.user.userId,
@@ -211,5 +220,88 @@ export const addMember = async (req, res) => {
   } catch (error) {
     console.error("Error adding member:", error);
     res.status(500).json({ message: "Failed to add member" });
+  }
+};
+
+// ADD collaborator to project
+export const addCollaborator = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid project ID format" });
+    }
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    const project = await Project.findOne({
+      _id: new mongoose.Types.ObjectId(id),
+      owner: req.user.userId,
+    });
+
+    if (!project) {
+      return res
+        .status(404)
+        .json({ message: "Project not found or no permission" });
+    }
+
+    // Check if collaborator already exists
+    const normalizedEmail = email.toLowerCase().trim();
+    if (project.collaborators.includes(normalizedEmail)) {
+      return res.status(400).json({ message: "Collaborator already exists" });
+    }
+
+    // Add collaborator
+    project.collaborators.push(normalizedEmail);
+    await project.save();
+
+    res.status(200).json({ project });
+  } catch (error) {
+    console.error("Error adding collaborator:", error);
+    res.status(500).json({ message: "Failed to add collaborator" });
+  }
+};
+
+// REMOVE collaborator from project
+export const removeCollaborator = async (req, res) => {
+  try {
+    const { id, email } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid project ID format" });
+    }
+
+    const project = await Project.findOne({
+      _id: new mongoose.Types.ObjectId(id),
+      owner: req.user.userId,
+    });
+
+    if (!project) {
+      return res
+        .status(404)
+        .json({ message: "Project not found or no permission" });
+    }
+
+    // Remove collaborator
+    const normalizedEmail = decodeURIComponent(email).toLowerCase().trim();
+    project.collaborators = project.collaborators.filter(
+      (collaborator) => collaborator !== normalizedEmail
+    );
+
+    await project.save();
+
+    res.status(200).json({ project });
+  } catch (error) {
+    console.error("Error removing collaborator:", error);
+    res.status(500).json({ message: "Failed to remove collaborator" });
   }
 };

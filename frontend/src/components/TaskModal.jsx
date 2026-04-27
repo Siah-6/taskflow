@@ -1,5 +1,6 @@
 import React from 'react';
 import TaskForm from './TaskForm';
+import ModalPortal from './ModalPortal';
 
 function TaskModal({ isOpen, onClose, onSubmit, projectId, initialData }) {
   if (!isOpen) return null;
@@ -23,11 +24,16 @@ function TaskModal({ isOpen, onClose, onSubmit, projectId, initialData }) {
   const isEditMode = !!initialData && !!initialData._id;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      onClick={handleBackdropClick}
-    >
-      <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <ModalPortal>
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+        style={{ zIndex: 9999 }}
+        onClick={handleBackdropClick}
+      >
+        <div 
+          className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
+          style={{ zIndex: 10000 }}
+        >
         <div className="p-7">
           <TaskForm 
             onSubmit={handleSubmit}
@@ -37,7 +43,8 @@ function TaskModal({ isOpen, onClose, onSubmit, projectId, initialData }) {
           />
         </div>
       </div>
-    </div>
+        </div>
+      </ModalPortal>
   );
 }
 

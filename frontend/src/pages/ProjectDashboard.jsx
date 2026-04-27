@@ -50,29 +50,11 @@ function ProjectDashboard({ selectedProject }) {
         
         setProjects(projects);
         
-        // Create recent activity (mock data for now)
-        const activity = [
-          {
-            type: "task",
-            message: `Completed task "${tasks[0]?.title || 'Task'}"`,
-            time: "2 hours ago",
-            icon: "✅"
-          },
-          {
-            type: "project",
-            message: `Created project "${projects[0]?.name || 'Project'}"`,
-            time: "5 hours ago",
-            icon: "📁"
-          },
-          {
-            type: "member",
-            message: `Added new member to project`,
-            time: "1 day ago",
-            icon: "👤"
-          }
-        ];
-        
-        setRecentActivity(activity);
+        // Set recent activity (last 5 tasks)
+        const recentTasks = tasks
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 5);
+        setRecentActivity(recentTasks);
         
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -82,6 +64,23 @@ function ProjectDashboard({ selectedProject }) {
     };
 
     fetchDashboardData();
+    
+    // Listen for project deletion and update events
+    const handleProjectDeleted = () => {
+      fetchDashboardData();
+    };
+    
+    const handleProjectUpdated = () => {
+      fetchDashboardData();
+    };
+    
+    window.addEventListener('projectDeleted', handleProjectDeleted);
+    window.addEventListener('projectUpdated', handleProjectUpdated);
+    
+    return () => {
+      window.removeEventListener('projectDeleted', handleProjectDeleted);
+      window.removeEventListener('projectUpdated', handleProjectUpdated);
+    };
   }, []);
 
   const completionRate = stats.totalTasks > 0 

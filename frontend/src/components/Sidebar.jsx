@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import ModalPortal from "./ModalPortal";
 
 function Sidebar({ onCreateProject }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openMenuProjectId, setOpenMenuProjectId] = useState(null);
+  const [renameModalProject, setRenameModalProject] = useState(null);
+  const [deleteModalProject, setDeleteModalProject] = useState(null);
+  const [newProjectName, setNewProjectName] = useState('');
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -39,6 +44,103 @@ function Sidebar({ onCreateProject }) {
       onCreateProject();
     }
   };
+
+  const handleMenuClick = (e, projectId) => {
+    e.stopPropagation();
+    setOpenMenuProjectId(openMenuProjectId === projectId ? null : projectId);
+  };
+
+  const handleRenameProject = (project) => {
+    setRenameModalProject(project);
+    setNewProjectName(project.name);
+    setOpenMenuProjectId(null);
+  };
+
+  const handleDeleteProject = (project) => {
+    setDeleteModalProject(project);
+    setOpenMenuProjectId(null);
+  };
+
+  const handleSaveRename = async () => {
+    if (renameModalProject && newProjectName.trim() && newProjectName !== renameModalProject.name) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.put(
+          `http://localhost:5000/api/projects/${renameModalProject._id}`,
+          { name: newProjectName.trim() },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        
+        // Update project in local state with response data
+        setProjects(projects.map(p => 
+          p._id === renameModalProject._id ? response.data : p
+        ));
+        
+        // Trigger a refresh of dashboard data
+        window.dispatchEvent(new CustomEvent('projectUpdated', { 
+          detail: { project: response.data } 
+        }));
+        
+      } catch (error) {
+        console.error('Error renaming project:', error);
+        alert('Failed to rename project. Please try again.');
+        return; // Don't close modal on error
+      }
+    }
+    setRenameModalProject(null);
+    setNewProjectName('');
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteModalProject) {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.delete(`http://localhost:5000/api/projects/${deleteModalProject._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        // Remove project from local state
+        setProjects(projects.filter(p => p._id !== deleteModalProject._id));
+        
+        // If user is currently on the deleted project page, redirect to dashboard
+        if (location.pathname === `/projects/${deleteModalProject._id}`) {
+          navigate('/dashboard');
+        }
+        
+        // Trigger a refresh of dashboard data by emitting a custom event
+        window.dispatchEvent(new CustomEvent('projectDeleted', { 
+          detail: { projectId: deleteModalProject._id } 
+        }));
+        
+      } catch (error) {
+        console.error('Error deleting project:', error);
+        alert('Failed to delete project. Please try again.');
+      }
+    }
+    setDeleteModalProject(null);
+  };
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setRenameModalProject(null);
+      setDeleteModalProject(null);
+      setNewProjectName('');
+    }
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenMenuProjectId(null);
+    };
+
+    if (openMenuProjectId) {
+      document.addEventListener('click', handleClickOutside);
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+      };
+    }
+  }, [openMenuProjectId]);
 
   const isActive = (path) => location.pathname === path;
   
@@ -109,23 +211,52 @@ function Sidebar({ onCreateProject }) {
               <div className="px-3 py-2 text-gray-500 text-sm">No projects yet</div>
             ) : (
               projects.map((project) => (
-                <button
+                <div
                   key={project._id}
-                  onClick={() => handleProjectClick(project)}
-                  className={`w-full text-left px-3 py-2 rounded-md transition-colors text-sm ${
-                    isProjectActive(project._id)
-                      ? "bg-blue-50 text-blue-600 font-medium"
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                  }`}
+                  className="group flex items-center justify-between w-full px-3 py-2 rounded-md transition-colors text-sm hover:bg-gray-100 relative"
                 >
-                  <div className="flex items-center gap-2">
+                  {/* Left side: dot + project name */}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     <div
                       className="w-3 h-3 rounded-full flex-shrink-0"
                       style={{ backgroundColor: project.boards?.[0]?.color || "#3B82F6" }}
                     />
-                    <span className="truncate">{project.name}</span>
+                    <span 
+                      className="truncate cursor-pointer hover:text-gray-900"
+                      onClick={() => handleProjectClick(project)}
+                    >
+                      {project.name}
+                    </span>
                   </div>
-                </button>
+
+                  {/* Right side: 3-dot button */}
+                  <button
+                    onClick={(e) => handleMenuClick(e, project._id)}
+                    className="w-7 h-7 border-none bg-transparent rounded-md text-[#64748b] cursor-pointer hover:bg-[#f1f5f9] hover:text-[#0f172a] transition-all duration-200 opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                    style={{ opacity: openMenuProjectId === project._id ? 1 : undefined }}
+                    title="More options"
+                  >
+                    ⋮
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {openMenuProjectId === project._id && (
+                    <div className="absolute right-2 top-8 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] py-1">
+                      <button
+                        onClick={() => handleRenameProject(project)}
+                        className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        Rename Project
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProject(project)}
+                        className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        Delete Project
+                      </button>
+                    </div>
+                  )}
+                </div>
               ))
             )}
           </div>
@@ -149,6 +280,93 @@ function Sidebar({ onCreateProject }) {
           </div>
         </button>
       </div>
+
+      {/* Rename Project Modal */}
+      {renameModalProject && (
+        <ModalPortal>
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            style={{ zIndex: 9999 }}
+            onClick={handleBackdropClick}
+          >
+            <div 
+              className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4"
+              style={{ zIndex: 10000 }}
+            >
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">Rename Project</h2>
+            </div>
+            <div className="px-6 py-4">
+              <input
+                type="text"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter project name"
+                autoFocus
+              />
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setRenameModalProject(null);
+                  setNewProjectName('');
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveRename}
+                disabled={!newProjectName.trim() || newProjectName === renameModalProject.name}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+        </ModalPortal>
+      )}
+
+      {/* Delete Project Modal */}
+      {deleteModalProject && (
+        <ModalPortal>
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            style={{ zIndex: 9999 }}
+            onClick={handleBackdropClick}
+          >
+            <div 
+              className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4"
+              style={{ zIndex: 10000 }}
+            >
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">Delete Project</h2>
+            </div>
+            <div className="px-6 py-4">
+              <p className="text-gray-600">
+                Are you sure you want to delete "{deleteModalProject.name}"? This action cannot be undone.
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteModalProject(null)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Delete Project
+              </button>
+            </div>
+          </div>
+        </div>
+        </ModalPortal>
+      )}
     </div>
   );
 }

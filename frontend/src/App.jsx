@@ -29,7 +29,7 @@ function App() {
         } />
         <Route path="/" element={
           <Layout>
-            <ProjectsPage />
+            <ProjectDashboard />
           </Layout>
         } />
       </Routes>

@@ -6,6 +6,8 @@ import {
   updateProject,
   deleteProject,
   addMember,
+  addCollaborator,
+  removeCollaborator,
 } from "../controllers/project.controller.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 
@@ -28,5 +30,11 @@ router.delete("/:id", verifyToken, deleteProject);
 
 // ADD member to project
 router.post("/:id/members", verifyToken, addMember);
+
+// ADD collaborator to project
+router.post("/:id/collaborators", verifyToken, addCollaborator);
+
+// REMOVE collaborator from project
+router.delete("/:id/collaborators/:email", verifyToken, removeCollaborator);
 
 export default router;

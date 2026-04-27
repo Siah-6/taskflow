@@ -36,7 +36,20 @@ function ProjectList({ onProjectSelect, onCreateProject, onProjectCreated }) {
   };
 
   const handleProjectClick = (project) => {
-    onProjectSelect(project);
+    // Navigate to project detail page
+    navigate(`/projects/${project._id}`);
+  };
+
+  const handleRenameProject = (projectId, newName) => {
+    // Update project in local state
+    setProjects(projects.map((p) =>
+      p._id === projectId ? { ...p, name: newName } : p
+    ));
+  };
+
+  const handleDeleteProject = (projectId) => {
+    // Remove project from local state
+    setProjects(projects.filter((p) => p._id !== projectId));
   };
 
   if (loading) {
@@ -149,6 +162,8 @@ function ProjectList({ onProjectSelect, onCreateProject, onProjectCreated }) {
               key={project._id}
               project={project}
               onClick={handleProjectClick}
+              onRename={handleRenameProject}
+              onDelete={handleDeleteProject}
             />
           ))}
         </div>

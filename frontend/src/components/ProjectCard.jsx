@@ -1,23 +1,31 @@
 import React from "react";
+import ProjectDropdownMenu from "./ProjectDropdownMenu";
 
-function ProjectCard({ project, onClick }) {
+function ProjectCard({ project, onClick, onRename, onDelete }) {
   const memberCount = project.members?.length || 1; // At least the owner
 
   return (
-    <div
-      onClick={() => onClick(project)}
-      className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-blue-300 hover:scale-[1.02] transition-all duration-200 cursor-pointer group"
-    >
-      <div className="space-y-4">
-        {/* Project Header */}
-        <div className="flex justify-between items-start">
-          <h3 className="text-lg font-semibold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors">
-            {project.name}
-          </h3>
-          <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs font-medium rounded-full group-hover:bg-blue-200 transition-colors">
-            {memberCount} {memberCount === 1 ? "member" : "members"}
-          </span>
-        </div>
+    <div className="group">
+      <div
+        onClick={() => onClick(project)}
+        className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-blue-300 hover:scale-[1.02] transition-all duration-200 cursor-pointer"
+      >
+        <div className="space-y-4">
+          {/* Project Header */}
+          <div className="flex justify-between items-start">
+            <h3 className="text-lg font-semibold text-gray-900 leading-tight hover:text-blue-600 transition-colors flex-1">
+              {project.name}
+            </h3>
+            
+            {/* 3-Dot Menu */}
+            <div className="relative">
+              <ProjectDropdownMenu
+                project={project}
+                onRename={onRename}
+                onDelete={onDelete}
+              />
+            </div>
+          </div>
 
         {/* Project Description */}
         {project.description && (
@@ -76,6 +84,7 @@ function ProjectCard({ project, onClick }) {
         </div>
       </div>
     </div>
+  </div>
   );
 }
 
