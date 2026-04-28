@@ -12,11 +12,18 @@ function Sidebar({ onCreateProject }) {
   const [renameModalProject, setRenameModalProject] = useState(null);
   const [deleteModalProject, setDeleteModalProject] = useState(null);
   const [newProjectName, setNewProjectName] = useState('');
+  const [currentUserId, setCurrentUserId] = useState('');
 
   useEffect(() => {
+    // Set current user ID
+    const token = localStorage.getItem("token");
+    if (token) {
+      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+      setCurrentUserId(tokenPayload.userId);
+    }
+
     const fetchProjects = async () => {
       try {
-        const token = localStorage.getItem("token");
         const response = await axios.get("http://localhost:5000/api/projects", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -227,6 +234,12 @@ function Sidebar({ onCreateProject }) {
                     >
                       {project.name}
                     </span>
+                    {project.owner && 
+                     project.owner._id !== JSON.parse(atob(localStorage.getItem("token").split('.')[1])).userId && (
+                      <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+                        Shared
+                      </span>
+                    )}
                   </div>
 
                   {/* Right side: 3-dot button */}
@@ -242,18 +255,30 @@ function Sidebar({ onCreateProject }) {
                   {/* Dropdown Menu */}
                   {openMenuProjectId === project._id && (
                     <div className="absolute right-2 top-8 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] py-1">
-                      <button
-                        onClick={() => handleRenameProject(project)}
-                        className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                      >
-                        Rename Project
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProject(project)}
-                        className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        Delete Project
-                      </button>
+                      {/* Only show rename/delete for project owners */}
+                      {project.owner && project.owner._id === currentUserId && (
+                        <>
+                          <button
+                            onClick={() => handleRenameProject(project)}
+                            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                          >
+                            Rename Project
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProject(project)}
+                            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            Delete Project
+                          </button>
+                        </>
+                      )}
+                      
+                      {/* Show view-only message for collaborators */}
+                      {project.owner && project.owner._id !== currentUserId && (
+                        <div className="px-3 py-2 text-sm text-gray-500">
+                          View only
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

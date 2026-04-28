@@ -18,6 +18,16 @@ function ProjectDetailPage() {
   const [showBoardManagement, setShowBoardManagement] = useState(false);
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [sortBy, setSortBy] = useState('dueDate');
+  const [currentUserId, setCurrentUserId] = useState('');
+
+  // Get current user ID on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+      setCurrentUserId(tokenPayload.userId);
+    }
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -218,27 +228,30 @@ function ProjectDetailPage() {
               </div>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowBoardManagement(true)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              {/* Only show Board Management for project owners */}
+              {project.owner && project.owner._id === currentUserId && (
+                <button
+                  onClick={() => setShowBoardManagement(true)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                  />
-                </svg>
-                Manage Boards
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m0 4v10m6-2a2 2 0 012-4m0 4v10m-6 2a2 2 0 01-4 0m0 4v10"
+                    />
+                  </svg>
+                  Manage Boards
+                </button>
+              )}
               <button
-                onClick={() => setShowTaskModal(true)}
+                onClick={() => setShowTaskCreation(true)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
               >
                 <svg
@@ -251,7 +264,7 @@ function ProjectDetailPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M12 4v16m8-8H4"
+                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m0 4v10m6-2a2 2 0 012-4m0 4v10m-6 2a2 2 0 01-4 0m0 4v10"
                   />
                 </svg>
                 Add Task
@@ -293,23 +306,6 @@ function ProjectDetailPage() {
           onUpdateTask={handleUpdateTask}
           onDeleteTask={handleDeleteTask}
           boards={project.boards}
-        />
-
-        {/* Board Management Modal */}
-        {showBoardManagement && (
-          <BoardManagement
-            project={project}
-            onBoardsUpdate={handleBoardsUpdate}
-            onClose={() => setShowBoardManagement(false)}
-          />
-        )}
-
-        {/* Task Creation Modal */}
-        <TaskModal
-          isOpen={showTaskModal}
-          onClose={() => setShowTaskModal(false)}
-          onSubmit={handleCreateTask}
-          projectId={projectId}
         />
       </div>
     </div>

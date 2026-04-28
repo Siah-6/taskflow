@@ -1,4 +1,6 @@
 import Task from "../models/task.model.js";
+import Project from "../models/project.model.js";
+import User from "../models/user.model.js";
 import mongoose from "mongoose";
 
 export const createTask = async (req, res) => {
@@ -66,8 +68,33 @@ export const getTasks = async (req, res) => {
       sortOrder = "desc",
     } = req.query;
 
-    // Build filter object
-    const filter = { user: req.user.userId };
+    // Get user email to check collaborator access
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Get all projects the user has access to
+    const accessibleProjects = await Project.find({
+      $or: [
+        { owner: req.user.userId },
+        { collaborators: user.email }
+      ]
+    }).select('_id');
+
+    const accessibleProjectIds = accessibleProjects.map(p => p._id);
+
+    // If project filter is specified, check if user has access to that project
+    if (project && project !== "all") {
+      if (!accessibleProjectIds.some(id => id.toString() === project)) {
+        return res.status(403).json({ message: "Access denied to this project" });
+      }
+    }
+
+    // Build filter object - filter by accessible projects
+    const filter = { 
+      project: { $in: accessibleProjectIds }
+    };
 
     // Add filters - handle arrays for multi-select
     if (status && status !== "all") {
@@ -88,6 +115,9 @@ export const getTasks = async (req, res) => {
 
     if (project && project !== "all") {
       filter.project = project;
+    } else {
+      // If no specific project filter, keep the accessible projects filter
+      // filter.project already contains { $in: accessibleProjectIds }
     }
 
     if (board && board !== "all") {
@@ -157,12 +187,35 @@ export const updateTask = async (req, res) => {
       return res.status(400).json({ message: "Invalid task ID format" });
     }
 
-    // Find task owned by user
-    const task = await Task.findOne({
-      _id: new mongoose.Types.ObjectId(id),
-      user: req.user.userId,
-    });
+    // Find task
+    const task = await Task.findById(id);
     if (!task) return res.status(404).json({ message: "Task not found" });
+
+    // Get user email to check collaborator access
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if user has access to the task's project
+    if (task.project) {
+      const project = await Project.findById(task.project);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      const isOwner = project.owner.toString() === req.user.userId;
+      const isCollaborator = project.collaborators.includes(user.email);
+
+      if (!isOwner && !isCollaborator) {
+        return res.status(403).json({ message: "Access denied to this task" });
+      }
+    } else {
+      // If task has no project, only the task owner can modify it
+      if (task.user.toString() !== req.user.userId) {
+        return res.status(403).json({ message: "Access denied to this task" });
+      }
+    }
 
     // Update fields if provided
     if (title !== undefined) task.title = title;
@@ -194,12 +247,38 @@ export const deleteTask = async (req, res) => {
       return res.status(400).json({ message: "Invalid task ID format" });
     }
 
-    // Find task owned by user
-    const task = await Task.findOneAndDelete({
-      _id: new mongoose.Types.ObjectId(id),
-      user: req.user.userId,
-    });
+    // Find task
+    const task = await Task.findById(id);
     if (!task) return res.status(404).json({ message: "Task not found" });
+
+    // Get user email to check collaborator access
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if user has access to the task's project
+    if (task.project) {
+      const project = await Project.findById(task.project);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      const isOwner = project.owner.toString() === req.user.userId;
+      const isCollaborator = project.collaborators.includes(user.email);
+
+      if (!isOwner && !isCollaborator) {
+        return res.status(403).json({ message: "Access denied to this task" });
+      }
+    } else {
+      // If task has no project, only the task owner can delete it
+      if (task.user.toString() !== req.user.userId) {
+        return res.status(403).json({ message: "Access denied to this task" });
+      }
+    }
+
+    // Delete the task
+    await Task.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Task deleted successfully" });
   } catch (error) {

@@ -13,9 +13,17 @@ function ProjectCard({ project, onClick, onRename, onDelete }) {
         <div className="space-y-4">
           {/* Project Header */}
           <div className="flex justify-between items-start">
-            <h3 className="text-lg font-semibold text-gray-900 leading-tight hover:text-blue-600 transition-colors flex-1">
-              {project.name}
-            </h3>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 leading-tight hover:text-blue-600 transition-colors">
+                {project.name}
+              </h3>
+              {project.owner && 
+               project.owner._id !== JSON.parse(atob(localStorage.getItem("token").split('.')[1])).userId && (
+                <span className="inline-block mt-1 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+                  Shared
+                </span>
+              )}
+            </div>
             
             {/* 3-Dot Menu */}
             <div className="relative">

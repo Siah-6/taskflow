@@ -1,4 +1,5 @@
 import Project from "../models/project.model.js";
+import User from "../models/user.model.js";
 import mongoose from "mongoose";
 
 // CREATE a new project
@@ -56,8 +57,18 @@ export const createProject = async (req, res) => {
 // GET all projects for the logged-in user
 export const getProjects = async (req, res) => {
   try {
+    // Get user email to check collaborator access
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     const projects = await Project.find({
-      $or: [{ owner: req.user.userId }, { "members.user": req.user.userId }],
+      $or: [
+        { owner: req.user.userId }, 
+        { "members.user": req.user.userId },
+        { collaborators: user.email }
+      ],
     })
       .populate("owner", "name email")
       .populate("members.user", "name email")
@@ -79,9 +90,19 @@ export const getProject = async (req, res) => {
       return res.status(400).json({ message: "Invalid project ID format" });
     }
 
+    // Get user email to check collaborator access
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     const project = await Project.findOne({
       _id: new mongoose.Types.ObjectId(id),
-      $or: [{ owner: req.user.userId }, { "members.user": req.user.userId }],
+      $or: [
+        { owner: req.user.userId }, 
+        { "members.user": req.user.userId },
+        { collaborators: user.email }
+      ],
     })
       .populate("owner", "name email")
       .populate("members.user", "name email");
@@ -90,7 +111,18 @@ export const getProject = async (req, res) => {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    res.status(200).json(project);
+    // Fetch user data for collaborators
+    const collaboratorUsers = await User.find({
+      email: { $in: project.collaborators }
+    }).select('name email');
+
+    // Create enriched project data
+    const enrichedProject = {
+      ...project.toObject(),
+      collaboratorUsers: collaboratorUsers
+    };
+
+    res.status(200).json(enrichedProject);
   } catch (error) {
     console.error("Error fetching project:", error);
     res.status(500).json({ message: "Failed to fetch project" });
@@ -260,11 +292,28 @@ export const addCollaborator = async (req, res) => {
       return res.status(400).json({ message: "Collaborator already exists" });
     }
 
+    // Check if user exists
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     // Add collaborator
     project.collaborators.push(normalizedEmail);
     await project.save();
 
-    res.status(200).json({ project });
+    // Fetch user data for collaborators
+    const collaboratorUsers = await User.find({
+      email: { $in: project.collaborators }
+    }).select('name email');
+
+    // Create enriched project data
+    const enrichedProject = {
+      ...project.toObject(),
+      collaboratorUsers: collaboratorUsers
+    };
+
+    res.status(200).json({ project: enrichedProject });
   } catch (error) {
     console.error("Error adding collaborator:", error);
     res.status(500).json({ message: "Failed to add collaborator" });
@@ -299,7 +348,18 @@ export const removeCollaborator = async (req, res) => {
 
     await project.save();
 
-    res.status(200).json({ project });
+    // Fetch user data for collaborators
+    const collaboratorUsers = await User.find({
+      email: { $in: project.collaborators }
+    }).select('name email');
+
+    // Create enriched project data
+    const enrichedProject = {
+      ...project.toObject(),
+      collaboratorUsers: collaboratorUsers
+    };
+
+    res.status(200).json({ project: enrichedProject });
   } catch (error) {
     console.error("Error removing collaborator:", error);
     res.status(500).json({ message: "Failed to remove collaborator" });
