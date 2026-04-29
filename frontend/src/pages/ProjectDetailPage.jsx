@@ -6,6 +6,7 @@ import TaskModal from "../components/TaskModal";
 import BoardManagement from "../components/BoardManagement";
 import ProjectFilters from "../components/ProjectFilters";
 import CollaboratorManager from "../components/CollaboratorManager";
+import CreateProject from "../components/CreateProject";
 
 function ProjectDetailPage() {
   const { projectId } = useParams();
@@ -16,6 +17,7 @@ function ProjectDetailPage() {
   const [error, setError] = useState("");
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showBoardManagement, setShowBoardManagement] = useState(false);
+  const [showCreateProject, setShowCreateProject] = useState(false);
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [sortBy, setSortBy] = useState('dueDate');
   const [currentUserId, setCurrentUserId] = useState('');
@@ -41,6 +43,7 @@ function ProjectDetailPage() {
             headers: { Authorization: `Bearer ${token}` },
           },
         );
+        console.log('Project data in Project Detail:', projectResponse.data);
         setProject(projectResponse.data);
 
         // Fetch tasks for this project only (no filters needed for project detail page)
@@ -154,6 +157,16 @@ function ProjectDetailPage() {
     setProject(updatedProject);
   };
 
+  const handleCreateProjectClose = () => {
+    setShowCreateProject(false);
+  };
+
+  const handleCreateProjectSuccess = (newProject) => {
+    setShowCreateProject(false);
+    // Optionally navigate to the new project or refresh
+    // For now, just close the modal
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -222,37 +235,13 @@ function ProjectDetailPage() {
                   Created {new Date(project.createdAt).toLocaleDateString()}
                 </span>
                 <span>•</span>
-                <span>{project.members?.length || 1} members</span>
-                <span>•</span>
-                <span>{project.boards?.length || 0} boards</span>
+                <span>{1 + (project.collaboratorUsers?.length || 0)} {1 + (project.collaboratorUsers?.length || 0) === 1 ? 'member' : 'members'}</span>
               </div>
             </div>
             <div className="flex gap-3">
-              {/* Only show Board Management for project owners */}
-              {project.owner && project.owner._id === currentUserId && (
-                <button
-                  onClick={() => setShowBoardManagement(true)}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m0 4v10m6-2a2 2 0 012-4m0 4v10m-6 2a2 2 0 01-4 0m0 4v10"
-                    />
-                  </svg>
-                  Manage Boards
-                </button>
-              )}
               <button
-                onClick={() => setShowTaskCreation(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                onClick={() => setShowCreateProject(true)}
+                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
               >
                 <svg
                   className="w-5 h-5"
@@ -264,7 +253,26 @@ function ProjectDetailPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m0 4v10m6-2a2 2 0 012-4m0 4v10m-6 2a2 2 0 01-4 0m0 4v10"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                New Project
+              </button>
+              <button
+                onClick={() => setShowTaskModal(true)}
+                className="px-4 py-2 bg-[#6F00FF] hover:bg-[#5a00cc] text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
                   />
                 </svg>
                 Add Task
@@ -306,6 +314,31 @@ function ProjectDetailPage() {
           onUpdateTask={handleUpdateTask}
           onDeleteTask={handleDeleteTask}
           boards={project.boards}
+        />
+
+        {/* Create Project Modal */}
+        {showCreateProject && (
+          <CreateProject
+            onClose={handleCreateProjectClose}
+            onSuccess={handleCreateProjectSuccess}
+          />
+        )}
+
+        {/* Board Management Modal */}
+        {showBoardManagement && (
+          <BoardManagement
+            project={project}
+            onBoardsUpdate={handleBoardsUpdate}
+            onClose={() => setShowBoardManagement(false)}
+          />
+        )}
+
+        {/* Task Creation Modal */}
+        <TaskModal
+          isOpen={showTaskModal}
+          onClose={() => setShowTaskModal(false)}
+          onSubmit={handleCreateTask}
+          projectId={projectId}
         />
       </div>
     </div>

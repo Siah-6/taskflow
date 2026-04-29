@@ -74,7 +74,21 @@ export const getProjects = async (req, res) => {
       .populate("members.user", "name email")
       .sort({ updatedAt: -1 });
 
-    res.status(200).json(projects);
+    // Fetch collaborator data for all projects
+    const enrichedProjects = await Promise.all(
+      projects.map(async (project) => {
+        const collaboratorUsers = await User.find({
+          email: { $in: project.collaborators }
+        }).select('name email');
+        
+        return {
+          ...project.toObject(),
+          collaboratorUsers: collaboratorUsers
+        };
+      })
+    );
+
+    res.status(200).json(enrichedProjects);
   } catch (error) {
     console.error("Error fetching projects:", error);
     res.status(500).json({ message: "Failed to fetch projects" });
@@ -296,6 +310,13 @@ export const addCollaborator = async (req, res) => {
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if user is already a collaborator (by user ID)
+    const existingCollaboratorUsers = await User.find({ email: { $in: project.collaborators } }).select('_id');
+    const existingCollaboratorIds = existingCollaboratorUsers.map(u => u._id.toString());
+    if (existingCollaboratorIds.includes(user._id.toString())) {
+      return res.status(400).json({ message: "User already added as collaborator" });
     }
 
     // Add collaborator

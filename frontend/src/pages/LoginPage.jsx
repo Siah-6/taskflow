@@ -31,9 +31,10 @@ const LoginPage = () => {
       );
       console.log(res.data);
 
-      // Store token and user email in localStorage
+      // Store token and full user object in localStorage
       localStorage.setItem("token", res.data.user.token);
       localStorage.setItem("userEmail", res.data.user.email);
+      localStorage.setItem("userName", res.data.user.name);
 
       // Show success message
       setMessage("Login successful!");

@@ -4,6 +4,7 @@ import SignUpPage from "./pages/SignUpPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
 import ProjectDashboard from "./pages/ProjectDashboard";
+import Settings from "./components/Settings";
 import Layout from "./components/Layout";
 
 function App() {
@@ -25,6 +26,11 @@ function App() {
         <Route path="/projects/:projectId" element={
           <Layout>
             <ProjectDetailPage />
+          </Layout>
+        } />
+        <Route path="/settings" element={
+          <Layout>
+            <Settings />
           </Layout>
         } />
         <Route path="/" element={

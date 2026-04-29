@@ -241,7 +241,7 @@ function TaskForm({ onSubmit, onCancel, initialData = {}, hideProjectField = fal
       <div className="flex gap-3 pt-4">
         <button 
           type="submit" 
-          className="flex-1 h-11 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-sm"
+          className="flex-1 h-11 bg-[#6F00FF] hover:bg-[#5a00cc] text-white font-medium rounded-lg transition-colors shadow-sm"
         >
           {initialData._id ? "Update Task" : "Create Task"}
         </button>

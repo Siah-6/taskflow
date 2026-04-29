@@ -5,6 +5,7 @@ import {
   loginUser,
   logoutUser,
   getUserProfile,
+  updateUserProfile,
 } from "../controllers/auth.controller.js";
 
 const router = express.Router();
@@ -12,6 +13,8 @@ const router = express.Router();
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/logout", logoutUser);
+router.get("/me", verifyToken, getUserProfile);
 router.get("/profile", verifyToken, getUserProfile);
+router.put("/profile", verifyToken, updateUserProfile);
 
 export default router;

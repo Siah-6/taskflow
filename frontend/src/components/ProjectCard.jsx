@@ -2,7 +2,7 @@ import React from "react";
 import ProjectDropdownMenu from "./ProjectDropdownMenu";
 
 function ProjectCard({ project, onClick, onRename, onDelete }) {
-  const memberCount = project.members?.length || 1; // At least the owner
+  const memberCount = 1 + (project.collaboratorUsers?.length || 0); // Owner + collaborators
 
   return (
     <div className="group">
@@ -72,27 +72,9 @@ function ProjectCard({ project, onClick, onRename, onDelete }) {
             {new Date(project.createdAt).toLocaleDateString()}
           </div>
         </div>
-
-        {/* Boards Preview */}
-        <div className="flex gap-2 pt-2">
-          {project.boards?.slice(0, 3).map((board, index) => (
-            <div
-              key={index}
-              className="px-2 py-1 bg-gray-50 rounded text-xs text-gray-600 border border-gray-200"
-              style={{ borderColor: board.color + "30" }}
-            >
-              {board.name}
-            </div>
-          ))}
-          {project.boards?.length > 3 && (
-            <div className="px-2 py-1 bg-gray-50 rounded text-xs text-gray-500 border border-gray-200">
-              +{project.boards.length - 3} more
-            </div>
-          )}
         </div>
       </div>
     </div>
-  </div>
   );
 }
 

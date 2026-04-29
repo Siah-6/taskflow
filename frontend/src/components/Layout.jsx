@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import CreateProject from "./CreateProject";
+import Footer from "./Footer";
 
 function Layout({ children }) {
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
@@ -20,14 +21,15 @@ function Layout({ children }) {
   };
 
   return (
-    <div className="flex">
-      <Sidebar onCreateProject={handleCreateProject} />
-      <div className="flex-1 ml-64 bg-gray-50 min-h-screen">
-        {React.cloneElement(children, { 
-          onCreateProject: handleCreateProject,
-          onProjectCreated: handleProjectSuccess
-        })}
+    <div className="flex flex-col min-h-screen">
+      <div className="flex flex-1">
+        <Sidebar onCreateProject={handleCreateProject} />
+        <div className="flex-1 ml-64 bg-gray-50">
+          {children}
+        </div>
       </div>
+      
+      <Footer />
       
       {/* Create Project Modal */}
       {showCreateProjectModal && (

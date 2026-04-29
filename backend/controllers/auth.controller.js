@@ -79,8 +79,47 @@ export const logoutUser = async (req, res) => {
 };
 
 export const getUserProfile = async (req, res) => {
-  res.status(200).json({
-    message: "Protected profile data",
-    user: req.user,
-  });
+  try {
+    const user = await User.findById(req.user.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateUserProfile = async (req, res) => {
+  try {
+    const { name } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.userId,
+      { name },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };

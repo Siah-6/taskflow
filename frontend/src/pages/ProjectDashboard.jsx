@@ -38,7 +38,7 @@ function ProjectDashboard({ selectedProject }) {
         ).length;
         
         const totalMembers = projects.reduce((sum, project) => 
-          sum + (project.members?.length || 1), 0
+          sum + 1 + (project.collaboratorUsers?.length || 0), 0
         );
         
         setStats({
@@ -50,11 +50,60 @@ function ProjectDashboard({ selectedProject }) {
         
         setProjects(projects);
         
-        // Set recent activity (last 5 tasks)
-        const recentTasks = tasks
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          .slice(0, 5);
-        setRecentActivity(recentTasks);
+        // Generate activity items from projects and tasks
+        const activities = [];
+        
+        // Add project creation activities
+        projects.forEach(project => {
+          activities.push({
+            type: 'project_created',
+            message: `Created project "${project.name}"`,
+            timestamp: new Date(project.createdAt),
+            icon: '📁'
+          });
+        });
+        
+        // Add task activities
+        tasks.forEach(task => {
+          // Task creation
+          activities.push({
+            type: 'task_created',
+            message: `Added task "${task.title}"`,
+            timestamp: new Date(task.createdAt),
+            icon: '📝'
+          });
+          
+          // Task completion
+          if (task.status === 'Completed' || task.status === 'Done') {
+            activities.push({
+              type: 'task_completed',
+              message: `Completed task "${task.title}"`,
+              timestamp: new Date(task.updatedAt || task.createdAt),
+              icon: '✅'
+            });
+          }
+          
+          // Task updates (if updatedAt exists and is different from createdAt)
+          if (task.updatedAt && task.updatedAt !== task.createdAt && task.status !== 'Completed' && task.status !== 'Done') {
+            activities.push({
+              type: 'task_updated',
+              message: `Updated task "${task.title}"`,
+              timestamp: new Date(task.updatedAt),
+              icon: '🔄'
+            });
+          }
+        });
+        
+        // Sort activities by timestamp (most recent first) and take top 5
+        const sortedActivities = activities
+          .sort((a, b) => b.timestamp - a.timestamp)
+          .slice(0, 5)
+          .map(activity => ({
+            ...activity,
+            time: getRelativeTime(activity.timestamp)
+          }));
+        
+        setRecentActivity(sortedActivities);
         
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -86,6 +135,27 @@ function ProjectDashboard({ selectedProject }) {
   const completionRate = stats.totalTasks > 0 
     ? Math.round((stats.completedTasks / stats.totalTasks) * 100)
     : 0;
+
+  // Helper function to get relative time
+  const getRelativeTime = (date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return 'just now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 604800) {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days} day${days > 1 ? 's' : ''} ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
 
   if (loading) {
     return (
@@ -197,7 +267,29 @@ function ProjectDashboard({ selectedProject }) {
                       <div>
                         <h3 className="font-medium text-gray-900">{project.name}</h3>
                         <p className="text-sm text-gray-600">
-                          {project.members?.length || 1} members • {project.boards?.length || 0} boards
+                          {(() => {
+                            console.log('Project object in Dashboard:', project);
+                            console.log('Project.collaborators:', project.collaborators);
+                            console.log('Project.collaboratorUsers:', project.collaboratorUsers);
+                            console.log('Project.members:', project.members);
+                            console.log('Project.owner:', project.owner);
+                            
+                            // Count only valid collaborators (exclude invalid/null entries)
+                            const collaboratorCount = Array.isArray(project.collaboratorUsers) 
+                              ? project.collaboratorUsers.filter(user => 
+                                  user && user._id && user.name && user.email
+                                ).length 
+                              : (Array.isArray(project.collaborators) 
+                                  ? project.collaborators.filter(email => 
+                                      email && email.trim() !== '' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+                                    ).length 
+                                    : 0);
+                            
+                            const memberCount = 1 + collaboratorCount;
+                            console.log('Final member count:', memberCount);
+                            
+                            return `${memberCount} ${memberCount === 1 ? 'member' : 'members'}`;
+                          })()}
                         </p>
                       </div>
                     </div>
@@ -266,53 +358,23 @@ function ProjectDashboard({ selectedProject }) {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
               <div className="space-y-3">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div className="text-lg">{activity.icon}</div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-900">{activity.message}</p>
-                      <p className="text-xs text-gray-500">{activity.time}</p>
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((activity, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className="text-lg">{activity.icon}</div>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-900">{activity.message}</p>
+                        <p className="text-xs text-gray-500">{activity.time}</p>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-gray-500 text-sm">No recent activity yet</p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mt-8 bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button
-              onClick={() => navigate("/projects")}
-              className="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-center"
-            >
-              <svg className="w-8 h-8 text-blue-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <p className="font-medium text-blue-900">Create Project</p>
-            </button>
-            
-            <button
-              onClick={() => navigate("/")}
-              className="p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors text-center"
-            >
-              <svg className="w-8 h-8 text-green-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <p className="font-medium text-green-900">Create Task</p>
-            </button>
-            
-            <button
-              onClick={() => navigate("/projects")}
-              className="p-4 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors text-center"
-            >
-              <svg className="w-8 h-8 text-purple-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <p className="font-medium text-purple-900">Manage Team</p>
-            </button>
           </div>
         </div>
       </div>
