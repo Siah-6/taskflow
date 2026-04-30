@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import API from "../api";
 
 function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -22,8 +22,8 @@ function SignUpPage() {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/register",
+      const res = await API.post(
+        "/api/auth/register",
         formData,
       );
       console.log(res.data);

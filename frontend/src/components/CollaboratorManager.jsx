@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../api';
 import ConfirmModal from './ConfirmModal';
 
 function CollaboratorManager({ project, onProjectUpdate }) {
@@ -44,8 +44,8 @@ function CollaboratorManager({ project, onProjectUpdate }) {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `http://localhost:5000/api/projects/${project._id}/collaborators`,
+      const response = await API.post(
+        `/api/projects/${project._id}/collaborators`,
         { email: email.trim() },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -78,8 +78,8 @@ function CollaboratorManager({ project, onProjectUpdate }) {
   const confirmRemoveCollaborator = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.delete(
-        `http://localhost:5000/api/projects/${project._id}/collaborators/${encodeURIComponent(collaboratorToRemove)}`,
+      const response = await API.delete(
+        `/api/projects/${project._id}/collaborators/${encodeURIComponent(collaboratorToRemove)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

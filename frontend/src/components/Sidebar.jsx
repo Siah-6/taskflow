@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import API from "../api";
 import { LayoutDashboard, Settings } from "lucide-react";
 import ModalPortal from "./ModalPortal";
 
@@ -25,7 +25,7 @@ function Sidebar({ onCreateProject }) {
 
     const fetchProjects = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/projects", {
+        const response = await API.get("/api/projects", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProjects(response.data);
@@ -73,8 +73,8 @@ function Sidebar({ onCreateProject }) {
     if (renameModalProject && newProjectName.trim() && newProjectName !== renameModalProject.name) {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.put(
-          `http://localhost:5000/api/projects/${renameModalProject._id}`,
+        const response = await API.put(
+          `/api/projects/${renameModalProject._id}`,
           { name: newProjectName.trim() },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -103,7 +103,7 @@ function Sidebar({ onCreateProject }) {
     if (deleteModalProject) {
       try {
         const token = localStorage.getItem("token");
-        await axios.delete(`http://localhost:5000/api/projects/${deleteModalProject._id}`, {
+        await API.delete(`/api/projects/${deleteModalProject._id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api";
 import TaskList from "../components/TaskList";
 import TaskModal from "../components/TaskModal";
 import BoardManagement from "../components/BoardManagement";
@@ -37,8 +37,8 @@ function ProjectDetailPage() {
         const token = localStorage.getItem("token");
 
         // Fetch project
-        const projectResponse = await axios.get(
-          `http://localhost:5000/api/projects/${projectId}`,
+        const projectResponse = await API.get(
+          `/api/projects/${projectId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -47,8 +47,8 @@ function ProjectDetailPage() {
         setProject(projectResponse.data);
 
         // Fetch tasks for this project only (no filters needed for project detail page)
-        const tasksResponse = await axios.get(
-          `http://localhost:5000/api/tasks?project=${projectId}`,
+        const tasksResponse = await API.get(
+          `/api/tasks?project=${projectId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -72,8 +72,8 @@ function ProjectDetailPage() {
   const handleCreateTask = async (taskData) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post(
-        "http://localhost:5000/api/tasks",
+      const response = await API.post(
+        "/api/tasks",
         taskData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -91,7 +91,7 @@ function ProjectDetailPage() {
   const handleUpdateTask = async (taskId, updates) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5000/api/tasks/${taskId}`, updates, {
+      await API.put(`/api/tasks/${taskId}`, updates, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -109,7 +109,7 @@ function ProjectDetailPage() {
   const handleDeleteTask = async (taskId) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/tasks/${taskId}`, {
+      await API.delete(`/api/tasks/${taskId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

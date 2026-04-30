@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import API from "../api";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -24,8 +24,8 @@ const LoginPage = () => {
     setMessage("");
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
+      const res = await API.post(
+        "/api/auth/login",
         formData,
         { timeout: 10000 }, // 10 second timeout
       );

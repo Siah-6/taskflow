@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import API from "../api";
 
 function TaskForm({ onSubmit, onCancel, initialData = {}, hideProjectField = false }) {
   const [formData, setFormData] = useState({
@@ -23,7 +23,7 @@ function TaskForm({ onSubmit, onCancel, initialData = {}, hideProjectField = fal
     const fetchProjects = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:5000/api/projects", {
+        const response = await API.get("/api/projects", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProjects(response.data);
