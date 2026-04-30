@@ -6,6 +6,7 @@ import ProjectDetailPage from "./pages/ProjectDetailPage";
 import ProjectDashboard from "./pages/ProjectDashboard";
 import Settings from "./components/Settings";
 import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -14,29 +15,39 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/dashboard" element={
-          <Layout>
-            <ProjectDashboard />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <ProjectDashboard />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/projects" element={
-          <Layout>
-            <ProjectsPage />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <ProjectsPage />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/projects/:projectId" element={
-          <Layout>
-            <ProjectDetailPage />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <ProjectDetailPage />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/settings" element={
-          <Layout>
-            <Settings />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Settings />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/" element={
-          <Layout>
-            <ProjectDashboard />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <ProjectDashboard />
+            </Layout>
+          </ProtectedRoute>
         } />
       </Routes>
     </BrowserRouter>
