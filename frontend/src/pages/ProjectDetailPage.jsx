@@ -224,7 +224,7 @@ function ProjectDetailPage() {
                   {project.name}
                 </h1>
                 <span className="px-3 py-1 bg-blue-100 text-blue-600 text-sm font-medium rounded-full">
-                  {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
+                  {getFilteredAndSortedTasks().length} {getFilteredAndSortedTasks().length === 1 ? "task" : "tasks"}
                 </span>
               </div>
               {project.description && (

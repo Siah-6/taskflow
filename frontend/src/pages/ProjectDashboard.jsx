@@ -37,9 +37,26 @@ function ProjectDashboard({ selectedProject }) {
           task.status === "Completed" || task.status === "Done"
         ).length;
         
-        const totalMembers = projects.reduce((sum, project) => 
-          sum + 1 + (project.collaboratorUsers?.length || 0), 0
-        );
+        // Count unique users across all projects
+        const uniqueUserIds = new Set();
+        
+        projects.forEach(project => {
+          // Add project owner
+          if (project.owner?._id) {
+            uniqueUserIds.add(project.owner._id.toString());
+          }
+          
+          // Add collaborators
+          if (project.collaboratorUsers && Array.isArray(project.collaboratorUsers)) {
+            project.collaboratorUsers.forEach(collaborator => {
+              if (collaborator._id) {
+                uniqueUserIds.add(collaborator._id.toString());
+              }
+            });
+          }
+        });
+        
+        const totalMembers = uniqueUserIds.size;
         
         setStats({
           totalProjects: projects.length,
