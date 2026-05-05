@@ -37,6 +37,18 @@ function Sidebar({ onCreateProject }) {
     };
 
     fetchProjects();
+
+    // Listen for project creation events
+    const handleProjectCreated = (event) => {
+      const newProject = event.detail.project;
+      setProjects(prevProjects => [newProject, ...prevProjects]);
+    };
+
+    window.addEventListener('projectCreated', handleProjectCreated);
+
+    return () => {
+      window.removeEventListener('projectCreated', handleProjectCreated);
+    };
   }, []);
 
   const handleNavigation = (path) => {

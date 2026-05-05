@@ -47,6 +47,9 @@ export const createProject = async (req, res) => {
       ],
     });
 
+    // Populate owner information before returning
+    await project.populate("owner", "name email");
+
     res.status(201).json({ project });
   } catch (error) {
     console.error("Error creating project:", error);

@@ -58,6 +58,16 @@ function CreateProject({ onClose, onSuccess }) {
         }
       );
 
+      // Clear form after successful creation
+      setFormData({ name: "", description: "" });
+      setErrors({});
+      
+      // Emit custom event to notify other components
+      window.dispatchEvent(new CustomEvent('projectCreated', { 
+        detail: { project: response.data.project } 
+      }));
+      
+      // Pass the new project to parent
       onSuccess(response.data.project);
       onClose();
     } catch (error) {

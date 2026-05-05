@@ -136,12 +136,26 @@ function ProjectDashboard({ selectedProject }) {
       fetchDashboardData();
     };
     
+    const handleProjectCreated = (event) => {
+      const newProject = event.detail.project;
+      // Update projects state immediately
+      setProjects(prevProjects => [newProject, ...prevProjects]);
+      // Update stats
+      setStats(prevStats => ({
+        ...prevStats,
+        totalProjects: prevStats.totalProjects + 1,
+        totalMembers: prevStats.totalMembers + 1 // Add the project owner
+      }));
+    };
+    
     window.addEventListener('projectDeleted', handleProjectDeleted);
     window.addEventListener('projectUpdated', handleProjectUpdated);
+    window.addEventListener('projectCreated', handleProjectCreated);
     
     return () => {
       window.removeEventListener('projectDeleted', handleProjectDeleted);
       window.removeEventListener('projectUpdated', handleProjectUpdated);
+      window.removeEventListener('projectCreated', handleProjectCreated);
     };
   }, []);
 

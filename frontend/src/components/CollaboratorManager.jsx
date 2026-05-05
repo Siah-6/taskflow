@@ -43,14 +43,15 @@ function CollaboratorManager({ project, onProjectUpdate }) {
     setError('');
 
     try {
-      const response = await axiosInstance.post(
+      await axiosInstance.post(
         `/projects/${project._id}/collaborators`,
         { email: email.trim() }
       );
 
-      // Only update project state on success
-      if (onProjectUpdate && response.data.project) {
-        onProjectUpdate(response.data.project);
+      // Refetch full project details to get populated owner and collaborator data
+      const projectResponse = await axiosInstance.get(`/projects/${project._id}`);
+      if (onProjectUpdate && projectResponse.data) {
+        onProjectUpdate(projectResponse.data);
       }
       
       // Clear email only on success
@@ -75,12 +76,14 @@ function CollaboratorManager({ project, onProjectUpdate }) {
 
   const confirmRemoveCollaborator = async () => {
     try {
-      const response = await axiosInstance.delete(
+      await axiosInstance.delete(
         `/projects/${project._id}/collaborators/${encodeURIComponent(collaboratorToRemove)}`
       );
 
-      if (onProjectUpdate) {
-        onProjectUpdate(response.data.project);
+      // Refetch full project details to get populated owner and collaborator data
+      const projectResponse = await axiosInstance.get(`/projects/${project._id}`);
+      if (onProjectUpdate && projectResponse.data) {
+        onProjectUpdate(projectResponse.data);
       }
     } catch (error) {
       console.error('Error removing collaborator:', error);
@@ -88,7 +91,7 @@ function CollaboratorManager({ project, onProjectUpdate }) {
     }
   };
 
-  const isOwner = project.owner?._id === currentUserId;
+  const isOwner = project.owner?._id === currentUserId || project.owner === currentUserId;
 
   // Debug logging to track owner detection
   console.log('CollaboratorManager Debug:', {
