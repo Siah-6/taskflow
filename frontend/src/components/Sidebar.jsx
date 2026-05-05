@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import API from "../api";
+import axios from "axios";
 import { LayoutDashboard, Settings } from "lucide-react";
 import ModalPortal from "./ModalPortal";
+import useAuth from "../hooks/useAuth";
 
 function Sidebar({ onCreateProject }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setAuthUser, logout } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openMenuProjectId, setOpenMenuProjectId] = useState(null);
@@ -25,7 +27,7 @@ function Sidebar({ onCreateProject }) {
 
     const fetchProjects = async () => {
       try {
-        const response = await API.get("/api/projects", {
+        const response = await axios.get("http://localhost:5000/api/projects", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProjects(response.data);
@@ -73,8 +75,8 @@ function Sidebar({ onCreateProject }) {
     if (renameModalProject && newProjectName.trim() && newProjectName !== renameModalProject.name) {
       try {
         const token = localStorage.getItem("token");
-        const response = await API.put(
-          `/api/projects/${renameModalProject._id}`,
+        const response = await axios.put(
+          `http://localhost:5000/api/projects/${renameModalProject._id}`,
           { name: newProjectName.trim() },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -103,7 +105,7 @@ function Sidebar({ onCreateProject }) {
     if (deleteModalProject) {
       try {
         const token = localStorage.getItem("token");
-        await API.delete(`/api/projects/${deleteModalProject._id}`, {
+        await axios.delete(`http://localhost:5000/api/projects/${deleteModalProject._id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         
@@ -299,10 +301,7 @@ function Sidebar({ onCreateProject }) {
       {/* Quick Actions */}
       <div className="p-4 border-t border-gray-100">
         <button
-          onClick={() => {
-            localStorage.removeItem("token");
-            navigate("/login");
-          }}
+          onClick={logout}
           className="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors text-sm"
         >
           <div className="flex items-center gap-2">

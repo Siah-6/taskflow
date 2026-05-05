@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { Link, Navigate } from "react-router-dom";
-import API from "../api";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import axiosInstance from "../lib/axios";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -10,12 +10,6 @@ const LoginPage = () => {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  // Redirect to dashboard if user is already logged in
-  const token = localStorage.getItem("token");
-  if (token) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   const handleChange = (e) => {
     setFormData({
@@ -30,17 +24,15 @@ const LoginPage = () => {
     setMessage("");
 
     try {
-      const res = await API.post(
-        "/api/auth/login",
+      const res = await axiosInstance.post(
+        "/auth/login",
         formData,
         { timeout: 10000 }, // 10 second timeout
       );
       console.log(res.data);
 
-      // Store token and full user object in localStorage
+      // Store token in localStorage (useAuth will handle state)
       localStorage.setItem("token", res.data.user.token);
-      localStorage.setItem("userEmail", res.data.user.email);
-      localStorage.setItem("userName", res.data.user.name);
 
       // Show success message
       setMessage("Login successful!");

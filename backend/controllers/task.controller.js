@@ -7,12 +7,6 @@ export const createTask = async (req, res) => {
   try {
     const { title, description, priority, project, board, dueDate } = req.body;
     
-    // Debug logging
-    console.log("=== CREATE TASK DEBUG ===");
-    console.log("req.body:", req.body);
-    console.log("dueDate received:", dueDate);
-    console.log("dueDate type:", typeof dueDate);
-    console.log("========================");
 
     if (!title) {
       return res.status(400).json({ message: "Title is required" });
@@ -37,11 +31,6 @@ export const createTask = async (req, res) => {
       user: req.user.userId, // from JWT
     });
 
-    // Debug logging after creation
-    console.log("=== TASK CREATED DEBUG ===");
-    console.log("Created task:", task);
-    console.log("Created task dueDate:", task.dueDate);
-    console.log("========================");
 
     res.status(201).json({
       message: "Task created",
@@ -160,14 +149,6 @@ export const getTasks = async (req, res) => {
       .sort(sortOptions)
       .populate("project", "name");
 
-    // Debug logging
-    console.log("=== GET TASKS DEBUG ===");
-    console.log("tasks found:", tasks.length);
-    if (tasks.length > 0) {
-      console.log("first task dueDate:", tasks[0].dueDate);
-      console.log("first task full data:", JSON.stringify(tasks[0], null, 2));
-    }
-    console.log("====================");
 
     res.status(200).json(tasks);
   } catch (error) {

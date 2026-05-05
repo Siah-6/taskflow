@@ -17,20 +17,33 @@ const app = express();
 
 connectDB();
 
-app.use(cors({
-  origin: ["http://localhost:5173", "https://task-flow-itdz.onrender.com"],
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+// CORS configuration - only allow localhost in development, disable in production
+if (process.env.NODE_ENV !== "production") {
+  app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }));
+}
+
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/projects", projectRoutes);
 
-app.get("/", (req, res) => {
-  res.send("TaskFlow API running");
-});
+// Serve static files and handle SPA routing in production
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  // SPA fallback - serve index.html for all non-API routes
+  app.get(/.*/, (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../frontend", "dist", "index.html"));
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.send("TaskFlow API running");
+  });
+}
 
 const PORT = process.env.PORT || 5000;
 

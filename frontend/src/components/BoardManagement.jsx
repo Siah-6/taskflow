@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import API from "../api";
+import axios from "axios";
 
 function BoardManagement({ project, onBoardsUpdate, onClose }) {
   const [boards, setBoards] = useState(project.boards || []);
@@ -26,8 +26,8 @@ function BoardManagement({ project, onBoardsUpdate, onClose }) {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await API.put(
-        `/api/projects/${project._id}`,
+      const response = await axios.put(
+        `http://localhost:5000/api/projects/${project._id}`,
         {
           ...project,
           boards: [...boards, {
@@ -61,8 +61,8 @@ function BoardManagement({ project, onBoardsUpdate, onClose }) {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await API.put(
-        `/api/projects/${project._id}`,
+      const response = await axios.put(
+        `http://localhost:5000/api/projects/${project._id}`,
         {
           ...project,
           boards: boards.filter(board => board.name !== boardName)
