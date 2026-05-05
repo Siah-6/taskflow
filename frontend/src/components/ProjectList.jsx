@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { axiosInstance } from "../lib/axios";
 import ProjectCard from "./ProjectCard";
 
 function ProjectList({ onProjectSelect, onCreateProject, onProjectCreated }) {
@@ -10,10 +10,7 @@ function ProjectList({ onProjectSelect, onCreateProject, onProjectCreated }) {
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/projects", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axiosInstance.get("/projects");
       setProjects(response.data);
       setError("");
     } catch (error) {

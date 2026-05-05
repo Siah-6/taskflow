@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { axiosInstance } from "../lib/axios";
 
 function ProjectDashboard({ selectedProject }) {
   const navigate = useNavigate();
@@ -20,14 +20,10 @@ function ProjectDashboard({ selectedProject }) {
         const token = localStorage.getItem("token");
         
         // Fetch projects
-        const projectsResponse = await axios.get("http://localhost:5000/api/projects", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const projectsResponse = await axiosInstance.get("/projects");
         
         // Fetch tasks
-        const tasksResponse = await axios.get("http://localhost:5000/api/tasks", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const tasksResponse = await axiosInstance.get("/tasks");
         
         const projects = projectsResponse.data;
         const tasks = tasksResponse.data;

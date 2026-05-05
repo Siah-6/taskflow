@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { axiosInstance } from "../lib/axios";
 
 function CreateProject({ onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -50,15 +50,11 @@ function CreateProject({ onClose, onSuccess }) {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        "http://localhost:5000/api/projects",
+      const response = await axiosInstance.post(
+        "/projects",
         {
           name: formData.name.trim(),
           description: formData.description.trim(),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
         }
       );
 

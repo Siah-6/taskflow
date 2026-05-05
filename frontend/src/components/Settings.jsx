@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { axiosInstance } from "../lib/axios";
 
 function Settings() {
   const navigate = useNavigate();
@@ -17,10 +17,7 @@ function Settings() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:5000/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await axiosInstance.get("/auth/me");
         
         setProfileData({
           name: response.data.name || "User",
@@ -52,13 +49,9 @@ function Settings() {
     setMessage("");
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.put(
-        "http://localhost:5000/api/auth/profile",
-        { name: profileData.name },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+      const response = await axiosInstance.put(
+        "/auth/profile",
+        { name: profileData.name }
       );
 
       // Update localStorage with new data

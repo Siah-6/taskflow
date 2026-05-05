@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { axiosInstance } from "../lib/axios";
 import ConfirmModal from './ConfirmModal';
 
 function CollaboratorManager({ project, onProjectUpdate }) {
@@ -43,11 +43,9 @@ function CollaboratorManager({ project, onProjectUpdate }) {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `http://localhost:5000/api/projects/${project._id}/collaborators`,
-        { email: email.trim() },
-        { headers: { Authorization: `Bearer ${token}` } }
+      const response = await axiosInstance.post(
+        `/projects/${project._id}/collaborators`,
+        { email: email.trim() }
       );
 
       // Only update project state on success
@@ -77,12 +75,8 @@ function CollaboratorManager({ project, onProjectUpdate }) {
 
   const confirmRemoveCollaborator = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.delete(
-        `http://localhost:5000/api/projects/${project._id}/collaborators/${encodeURIComponent(collaboratorToRemove)}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const response = await axiosInstance.delete(
+        `/projects/${project._id}/collaborators/${encodeURIComponent(collaboratorToRemove)}`
       );
 
       if (onProjectUpdate) {

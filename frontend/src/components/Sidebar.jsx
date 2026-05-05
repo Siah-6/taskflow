@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import { axiosInstance } from "../lib/axios";
 import { LayoutDashboard, Settings } from "lucide-react";
 import ModalPortal from "./ModalPortal";
 import useAuth from "../hooks/useAuth";
@@ -27,9 +27,7 @@ function Sidebar({ onCreateProject }) {
 
     const fetchProjects = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/projects", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axiosInstance.get("/projects");
         setProjects(response.data);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -74,11 +72,9 @@ function Sidebar({ onCreateProject }) {
   const handleSaveRename = async () => {
     if (renameModalProject && newProjectName.trim() && newProjectName !== renameModalProject.name) {
       try {
-        const token = localStorage.getItem("token");
-        const response = await axios.put(
-          `http://localhost:5000/api/projects/${renameModalProject._id}`,
-          { name: newProjectName.trim() },
-          { headers: { Authorization: `Bearer ${token}` } }
+        const response = await axiosInstance.put(
+          `/projects/${renameModalProject._id}`,
+          { name: newProjectName.trim() }
         );
         
         // Update project in local state with response data
@@ -104,10 +100,7 @@ function Sidebar({ onCreateProject }) {
   const handleConfirmDelete = async () => {
     if (deleteModalProject) {
       try {
-        const token = localStorage.getItem("token");
-        await axios.delete(`http://localhost:5000/api/projects/${deleteModalProject._id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axiosInstance.delete(`/projects/${deleteModalProject._id}`);
         
         // Remove project from local state
         setProjects(projects.filter(p => p._id !== deleteModalProject._id));

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { axiosInstance } from "../lib/axios";
 
 function BoardManagement({ project, onBoardsUpdate, onClose }) {
   const [boards, setBoards] = useState(project.boards || []);
@@ -25,9 +25,8 @@ function BoardManagement({ project, onBoardsUpdate, onClose }) {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.put(
-        `http://localhost:5000/api/projects/${project._id}`,
+      const response = await axiosInstance.put(
+        `/projects/${project._id}`,
         {
           ...project,
           boards: [...boards, {
@@ -35,9 +34,6 @@ function BoardManagement({ project, onBoardsUpdate, onClose }) {
             color: "#" + Math.floor(Math.random()*16777215).toString(16),
             createdAt: new Date()
           }]
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
         }
       );
 
@@ -60,15 +56,11 @@ function BoardManagement({ project, onBoardsUpdate, onClose }) {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.put(
-        `http://localhost:5000/api/projects/${project._id}`,
+      const response = await axiosInstance.put(
+        `/projects/${project._id}`,
         {
           ...project,
           boards: boards.filter(board => board.name !== boardName)
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
         }
       );
 
