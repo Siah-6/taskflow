@@ -17,8 +17,13 @@ const app = express();
 
 connectDB();
 
-// CORS configuration - only allow localhost in development, disable in production
-if (process.env.NODE_ENV !== "production") {
+// CORS configuration - allow localhost in development, CLIENT_URL in production
+if (process.env.NODE_ENV === "production") {
+  app.use(cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  }));
+} else {
   app.use(cors({
     origin: "http://localhost:5173",
     credentials: true,
@@ -36,7 +41,7 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
   // SPA fallback - serve index.html for all non-API routes
-  app.get(/.*/, (req, res) => {
+  app.get(/^(?!\/api).*/, (req, res) => {
     res.sendFile(path.resolve(__dirname, "../frontend", "dist", "index.html"));
   });
 } else {
