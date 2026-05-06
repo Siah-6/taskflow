@@ -13,6 +13,7 @@ function ProjectDashboard({ selectedProject }) {
   });
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [showAllProjects, setShowAllProjects] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -270,15 +271,15 @@ function ProjectDashboard({ selectedProject }) {
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
                 <button
-                  onClick={() => navigate("/projects")}
+                  onClick={() => setShowAllProjects(!showAllProjects)}
                   className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                 >
-                  View All
+                  {showAllProjects ? "Show Less" : "View All"}
                 </button>
               </div>
               
               <div className="space-y-4">
-                {projects.slice(0, 5).map((project) => (
+                {projects.slice(0, showAllProjects ? projects.length : 5).map((project) => (
                   <div
                     key={project._id}
                     className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
@@ -332,7 +333,7 @@ function ProjectDashboard({ selectedProject }) {
                   <div className="text-center py-8">
                     <p className="text-gray-500">No projects yet</p>
                     <button
-                      onClick={() => navigate("/projects")}
+                      onClick={() => {/* No-op - handled by CreateProject modal */}}
                       className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
                       Create your first project

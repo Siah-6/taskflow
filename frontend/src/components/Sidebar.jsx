@@ -211,7 +211,7 @@ function Sidebar({ onCreateProject }) {
         <div className="mt-8">
           <div className="flex items-center justify-between mb-3">
             <h3 
-              onClick={() => handleNavigation("/projects")}
+              onClick={() => handleNavigation("/dashboard")}
               className="text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700 transition-colors"
             >
               PROJECTS

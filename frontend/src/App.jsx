@@ -40,11 +40,7 @@ function App() {
         />
         <Route 
           path="/projects" 
-          element={authUser ? (
-            <Layout>
-              <ProjectsPage />
-            </Layout>
-          ) : <Navigate to="/login" replace />} 
+          element={<Navigate to="/dashboard" replace />} 
         />
         <Route 
           path="/projects/:projectId" 
