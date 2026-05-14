@@ -1,6 +1,7 @@
 import { useState } from "react";
 import TaskModal from "./TaskModal";
 import TaskDetailsModal from "./TaskDetailsModal";
+import ModalPortal from "./ModalPortal";
 
 function TaskItem({ task, onUpdateTask, onDeleteTask }) {
   // Debug logging
@@ -12,6 +13,7 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
   const [isDragging, setIsDragging] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const statusOptions = ["To Do", "In Progress", "Completed"];
   const priorityOptions = ["Low", "Medium", "High"];
@@ -47,8 +49,21 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
   };
 
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this task?")) {
-      onDeleteTask(task._id);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDeleteTask(task._id);
+    setShowDeleteModal(false);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+  };
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setShowDeleteModal(false);
     }
   };
 
@@ -242,6 +257,45 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
+
+      {/* Delete Task Modal */}
+      {showDeleteModal && (
+        <ModalPortal>
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            style={{ zIndex: 9999 }}
+            onClick={handleBackdropClick}
+          >
+            <div 
+              className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4"
+              style={{ zIndex: 10000 }}
+            >
+              <div className="px-6 py-4 border-b border-gray-100">
+                <h2 className="text-lg font-semibold text-gray-900">Delete Task</h2>
+              </div>
+              <div className="px-6 py-4">
+                <p className="text-gray-600">
+                  Are you sure you want to delete "{task.title}"? This action cannot be undone.
+                </p>
+              </div>
+              <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+                <button
+                  onClick={handleCancelDelete}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Delete Task
+                </button>
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
     </div>
   );
 }

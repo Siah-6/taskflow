@@ -74,9 +74,13 @@ function TaskForm({ onSubmit, onCancel, initialData = {}, hideProjectField = fal
       description: formData.description.trim(),
       status: formData.status,
       priority: formData.priority,
-      project: formData.project || null,
       dueDate: formData.dueDate || null,
     };
+
+    // Only include project field if not hidden
+    if (!hideProjectField) {
+      submitData.project = formData.project || null;
+    }
 
     // Debug logging
     console.log("=== TASK FORM SUBMIT DEBUG ===");

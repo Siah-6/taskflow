@@ -201,10 +201,10 @@ function ProjectDetailPage() {
       <div className="max-w-6xl mx-auto">
         {/* Project Header */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold text-gray-900">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900">
                   {project.name}
                 </h1>
                 <span className="px-3 py-1 bg-blue-100 text-blue-600 text-sm font-medium rounded-full">
@@ -214,7 +214,7 @@ function ProjectDetailPage() {
               {project.description && (
                 <p className="text-gray-600 mb-3">{project.description}</p>
               )}
-              <div className="flex items-center gap-4 text-sm text-gray-500">
+              <div className="flex flex-wrap items-center gap-2 md:gap-4 text-sm text-gray-500">
                 <span>
                   Created {new Date(project.createdAt).toLocaleDateString()}
                 </span>
@@ -222,10 +222,10 @@ function ProjectDetailPage() {
                 <span>{1 + (project.collaboratorUsers?.length || 0)} {1 + (project.collaboratorUsers?.length || 0) === 1 ? 'member' : 'members'}</span>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full md:w-auto">
               <button
                 onClick={() => setShowCreateProject(true)}
-                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
               >
                 <svg
                   className="w-5 h-5"
@@ -244,7 +244,7 @@ function ProjectDetailPage() {
               </button>
               <button
                 onClick={() => setShowTaskModal(true)}
-                className="px-4 py-2 bg-[#6F00FF] hover:bg-[#5a00cc] text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-[#6F00FF] hover:bg-[#5a00cc] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
               >
                 <svg
                   className="w-5 h-5"

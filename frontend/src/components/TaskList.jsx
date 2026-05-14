@@ -83,14 +83,14 @@ function TaskList({
   };
 
   return (
-    <div className="flex gap-2 max-w-6xl mx-auto">
+    <div className="flex flex-col md:flex-row gap-2 md:gap-2 max-w-6xl mx-auto">
       {boards.map((board) => {
         const boardTasks = getTasksForBoard(board.name);
 
         return (
           <div
             key={board.name}
-            className={`flex-1 min-w-[280px] transition-colors ${
+            className={`flex-1 min-w-0 md:min-w-[280px] transition-colors ${
               dragOverBoard === board.name 
                 ? "bg-blue-50/20" 
                 : ""
@@ -115,7 +115,7 @@ function TaskList({
                 </span>
               </div>
             </div>
-            <div className="p-2 space-y-2 min-h-[500px]">
+            <div className="p-2 space-y-2 min-h-[200px] md:min-h-[500px]">
               {boardTasks.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-xs text-gray-500">

@@ -2,7 +2,7 @@ import React from 'react';
 import TaskForm from './TaskForm';
 import ModalPortal from './ModalPortal';
 
-function TaskModal({ isOpen, onClose, onSubmit, projectId, initialData }) {
+function TaskModal({ isOpen, onClose, onSubmit, projectId, initialData, hideProjectField }) {
   if (!isOpen) return null;
 
   const handleBackdropClick = (e) => {
@@ -39,7 +39,7 @@ function TaskModal({ isOpen, onClose, onSubmit, projectId, initialData }) {
             onSubmit={handleSubmit}
             onCancel={onClose}
             initialData={initialData || { project: projectId }}
-            hideProjectField={!!projectId}
+            hideProjectField={hideProjectField !== undefined ? hideProjectField : (isEditMode || !!projectId)}
           />
         </div>
       </div>
