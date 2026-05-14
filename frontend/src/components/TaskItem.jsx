@@ -179,7 +179,7 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-1 opacity-0 hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1">
           <button
             onClick={(e) => {
                 e.stopPropagation();
