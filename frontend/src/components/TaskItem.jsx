@@ -15,7 +15,7 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const statusOptions = ["To Do", "In Progress", "Completed"];
+  const statusOptions = ["To Do", "In Progress", "Done"];
   const priorityOptions = ["Low", "Medium", "High"];
 
   // Check if task is overdue

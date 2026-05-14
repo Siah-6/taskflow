@@ -15,7 +15,7 @@ function TaskForm({ onSubmit, onCancel, initialData = {}, hideProjectField = fal
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
 
-  const statusOptions = ["To Do", "In Progress", "Completed"];
+  const statusOptions = ["To Do", "In Progress", "Done"];
   const priorityOptions = ["Low", "Medium", "High"];
 
   // Fetch projects for dropdown
