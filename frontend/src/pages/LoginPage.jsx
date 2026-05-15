@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import axiosInstance from "../lib/axios";
 
 const LoginPage = () => {
@@ -33,8 +34,7 @@ const LoginPage = () => {
 
       // Store token in localStorage (useAuth will handle state)
       localStorage.setItem("token", res.data.user.token);
-
-      // Show success message
+      toast.success("Login successful");
       setMessage("Login successful!");
 
       // Redirect to dashboard/home page after a short delay
@@ -44,11 +44,13 @@ const LoginPage = () => {
     } catch (error) {
       console.log(error.response?.data || error.message);
       if (error.code === "ECONNABORTED") {
-        setMessage(
-          "Request timed out. Please check if the backend server is running.",
-        );
+        const timeoutMessage = "Request timed out. Please check if the backend server is running.";
+        setMessage(timeoutMessage);
+        toast.error(timeoutMessage);
       } else {
-        setMessage(error.response?.data?.message || "Login failed");
+        const errorMessage = error.response?.data?.message || "Login failed";
+        setMessage(errorMessage);
+        toast.error(errorMessage);
       }
     } finally {
       setIsLoading(false);

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 
 function CreateProject({ onClose, onSuccess }) {
@@ -69,12 +70,15 @@ function CreateProject({ onClose, onSuccess }) {
       
       // Pass the new project to parent
       onSuccess(response.data.project);
+      toast.success("Project created");
       onClose();
     } catch (error) {
       console.error("Error creating project:", error);
+      const errorMessage = error.response?.data?.message || "Failed to create project";
       setErrors({
-        submit: error.response?.data?.message || "Failed to create project",
+        submit: errorMessage,
       });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

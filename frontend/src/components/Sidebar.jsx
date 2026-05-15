@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
 import { LayoutDashboard, Settings, X } from "lucide-react";
+import toast from "react-hot-toast";
 import ModalPortal from "./ModalPortal";
 import useAuth from "../hooks/useAuth";
 
@@ -135,10 +136,11 @@ function Sidebar({ onCreateProject, isMobile, onMobileClose }) {
         window.dispatchEvent(new CustomEvent('projectDeleted', { 
           detail: { projectId: deleteModalProject._id } 
         }));
-        
+
+        toast.success('Project deleted');
       } catch (error) {
         console.error('Error deleting project:', error);
-        alert('Failed to delete project. Please try again.');
+        toast.error(error.response?.data?.message || 'Failed to delete project. Please try again.');
       }
     }
     setDeleteModalProject(null);

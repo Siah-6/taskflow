@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { axiosInstance } from "../lib/axios";
 import ConfirmModal from './ConfirmModal';
 
@@ -55,11 +56,13 @@ function CollaboratorManager({ project, onProjectUpdate }) {
       
       // Clear email only on success
       setEmail('');
+      toast.success('Collaborator added');
     } catch (error) {
       console.error('Error adding collaborator:', error);
       // Set error message from backend response
       const errorMessage = error.response?.data?.message || 'Failed to add collaborator';
       setError(errorMessage);
+      toast.error(errorMessage);
       
       // Do NOT update project state on error
       // Do NOT clear email on error so user can retry
@@ -82,9 +85,10 @@ function CollaboratorManager({ project, onProjectUpdate }) {
       if (onProjectUpdate) {
         onProjectUpdate(response.data.project);
       }
+      toast.success('Collaborator removed');
     } catch (error) {
       console.error('Error removing collaborator:', error);
-      alert(error.response?.data?.message || 'Failed to remove collaborator');
+      toast.error(error.response?.data?.message || 'Failed to remove collaborator');
     }
   };
 

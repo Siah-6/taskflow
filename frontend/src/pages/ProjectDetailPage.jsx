@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 import TaskList from "../components/TaskList";
 import TaskModal from "../components/TaskModal";
@@ -72,9 +73,12 @@ function ProjectDetailPage() {
 
       setTasks([response.data.task || response.data, ...tasks]);
       setError("");
+      toast.success("Task created");
     } catch (error) {
       console.error("Error creating task:", error);
-      setError("Failed to create task: " + (error.response?.data?.message || error.message));
+      const message = error.response?.data?.message || error.message || "Failed to create task";
+      setError(`Failed to create task: ${message}`);
+      toast.error(message);
     }
   };
 
@@ -87,9 +91,12 @@ function ProjectDetailPage() {
           task._id === taskId ? { ...task, ...updates } : task,
         ),
       );
+      toast.success("Task updated");
     } catch (error) {
       console.error("Error updating task:", error);
-      setError("Failed to update task");
+      const message = error.response?.data?.message || error.message || "Failed to update task";
+      setError(`Failed to update task: ${message}`);
+      toast.error(message);
     }
   };
 
@@ -98,9 +105,12 @@ function ProjectDetailPage() {
       await axiosInstance.delete(`/tasks/${taskId}`);
 
       setTasks(tasks.filter((task) => task._id !== taskId));
+      toast.success("Task deleted");
     } catch (error) {
       console.error("Error deleting task:", error);
-      setError("Failed to delete task");
+      const message = error.response?.data?.message || error.message || "Failed to delete task";
+      setError(`Failed to delete task: ${message}`);
+      toast.error(message);
     }
   };
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 
 function SignUpPage() {
@@ -27,6 +28,7 @@ function SignUpPage() {
         formData,
       );
       console.log(res.data);
+      toast.success("Signup successful");
       setMessage("Signup successful!");
 
       // Auto-redirect to login after 1.5 seconds
@@ -35,7 +37,9 @@ function SignUpPage() {
       }, 1500);
     } catch (error) {
       console.log(error.response?.data || error.message);
-      setMessage(error.response?.data?.message || "Signup failed");
+      const errorMessage = error.response?.data?.message || "Signup failed";
+      setMessage(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
