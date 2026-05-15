@@ -124,6 +124,60 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
     }
   };
 
+  const getDueDateInfo = () => {
+    if (!task.dueDate) {
+      return {
+        text: "No due date",
+        colorClass: "text-gray-400",
+        iconColor: "text-gray-400",
+      };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const due = new Date(task.dueDate);
+    due.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.round((due - today) / 86400000);
+    const formattedDate = due.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+
+    if (isOverdue()) {
+      return {
+        text: `${formattedDate} (Overdue)`,
+        colorClass: "text-red-500",
+        iconColor: "text-red-500",
+      };
+    }
+
+    if (diffDays === 0) {
+      return {
+        text: "Due Today",
+        colorClass: "text-amber-500",
+        iconColor: "text-amber-500",
+      };
+    }
+
+    if (diffDays === 1) {
+      return {
+        text: "Due Tomorrow",
+        colorClass: "text-yellow-500",
+        iconColor: "text-yellow-500",
+      };
+    }
+
+    return {
+      text: formattedDate,
+      colorClass: "text-gray-400",
+      iconColor: "text-gray-400",
+    };
+  };
+
+  const dueDateInfo = getDueDateInfo();
+
   return (
     <div className="relative">
       {/* Task Card */}
@@ -172,7 +226,7 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
         {/* Due Date - Bottom Only */}
         <div className="flex items-center gap-1">
           <svg
-            className={`w-3 h-3 ${isOverdue() ? 'text-red-500' : 'text-gray-400'}`}
+            className={`w-3 h-3 ${dueDateInfo.iconColor}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -184,12 +238,8 @@ function TaskItem({ task, onUpdateTask, onDeleteTask }) {
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <span className={`text-xs ${isOverdue() ? 'text-red-500' : 'text-gray-400'}`}>
-            {task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric' 
-            }) : 'No due date'}
-            {isOverdue() && ' (Overdue)'}
+          <span className={`text-xs ${dueDateInfo.colorClass}`}>
+            {dueDateInfo.text}
           </span>
         </div>
 
